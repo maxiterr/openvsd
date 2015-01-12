@@ -1,0 +1,692 @@
+#!/usr/bin/env python
+import click
+from nuage import NuageConnection, NuageHTTPError, NuageResponse
+from prettytable import PrettyTable
+
+
+def print_object(obj, only=None, exclude=[]):
+    if only :
+        if only in obj:
+            print obj[only]
+            return
+        else :
+            print "No such key : %s" %only
+    table = PrettyTable(["Field", "Value"])
+    table.align["Field"] = "l"
+
+    for key in obj.keys():
+        if key not in exclude:
+            table.add_row( [ key, obj[key] ] )
+    print table
+
+@click.group()
+@click.option('--vsd-hostname',metavar='<hostname>', envvar='VSD_HOSTNAME',
+              help='VSD address or fqdn (Env: VSD_HOSTNAME)', required=True )
+@click.option('--vsd-username',metavar='<username>', envvar='VSD_USERNAME',
+              help='VSD Authentication username (Env: VSD_USERNAME)', required=True )
+@click.option('--vsd-password',metavar='<password>', envvar='VSD_PASSWORD',
+              help='VSD Authentication password (Env: VSD_PASSWORD)', required=True )
+@click.option('--vsd-enterprise',metavar='<enterprise>', envvar='VSD_ENTERPRISE',
+              help='VSD Authentication enterprise (Env: VSD_ENTERPRISE)', required=True )
+@click.option('--vsd-port',metavar='<port>', envvar='VSD_PORT', type=int,
+              help='VSD port (Env: VSD_PORT)', required=True )
+@click.option('--show-only',metavar='<key>',
+              help='Show only the value for a given key (usable for show and create command)' )
+@click.pass_context
+def vsdcli(ctx, vsd_hostname, vsd_username, vsd_password, vsd_enterprise, vsd_port, show_only):
+    """Command-line interface to the VSD APIs"""
+
+    nc = NuageConnection( vsd_hostname,
+                          enterprise=vsd_enterprise,
+                          username=vsd_username,
+                          password=vsd_password,
+                          version="v1_0",
+                          port=vsd_port )
+
+    ctx.obj['nc'] = nc
+    ctx.obj['show_only'] = show_only
+
+@vsdcli.command(name='me-show')
+@click.option('--verbose', count=True, help='Show APIKey')
+@click.pass_context
+def me_show(ctx, verbose):
+    """Show my own user information"""
+    result = ctx.obj['nc'].me
+    if verbose >= 1:
+        print_object( result )
+    else:
+        print_object( result, exclude=['APIKey'], only=ctx.obj['show_only'] )
+
+
+@vsdcli.command(name='license-list')
+@click.pass_context
+def license_list(ctx):
+    """Show all license within the VSD"""
+    from datetime import datetime
+    result = ctx.obj['nc'].get("licenses").obj()
+    table=PrettyTable(["License id", "Compagny", "Max NICs", "Max VMs", "Version", "Expiration"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                          line['company'],
+                          line['allowedNICsCount'],
+                          line['allowedVMsCount'],
+                          line['productVersion'] + 'R' + str(line['majorRelease']),
+                          datetime.fromtimestamp( line['expirationDate']/1000 ).strftime('%Y-%m-%d %H:%M:%S') ] )
+    print table
+
+@vsdcli.command(name='license-show')
+@click.argument('license-id', metavar='<license-id>', required=True)
+@click.option('--verbose', count=True, help='Show license code in BASE64')
+@click.pass_context
+def license_show(ctx, license_id, verbose):
+    """Show license detail for a given license id"""
+    result = ctx.obj['nc'].get("licenses/%s" %license_id).obj()[0]
+    print_object( result, exclude=['license'], only=ctx.obj['show_only'] )
+    if verbose >= 1:
+        print "License : " + result['license']
+
+@vsdcli.command(name='license-create')
+@click.argument('license', metavar='<license (Base64)>', required=True)
+@click.pass_context
+def license_create(ctx, license):
+    """Add a license to the VSD"""
+    result = ctx.obj['nc'].post("licenses/" , { "license": license }).obj()[0]
+    print_object( result, exclude=['license'], only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='license-delete')
+@click.argument('license-id', metavar='<license ID>', required=True)
+@click.pass_context
+def license_delete(ctx, license_id):
+    """Delete a given license"""
+    ctx.obj['nc'].delete("licenses/%s" %license_id)
+
+@vsdcli.command(name='enterprise-list')
+@click.pass_context
+def enterprise_list(ctx):
+    """Show all enterprise within the VSD"""
+    result = ctx.obj['nc'].get("enterprises").obj()
+    table=PrettyTable(["Enterprise ID", "Name"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'] ] )
+    print table
+
+@vsdcli.command(name='enterprise-show')
+@click.argument('enterprise-id', metavar='<enterprise-id>', required=True)
+@click.pass_context
+def enterprise_show(ctx, enterprise_id):
+    """Show information for a given enterprise id"""
+    result = ctx.obj['nc'].get("enterprises/%s" %enterprise_id).obj()[0]
+    print_object( result, exclude=['APIKey'], only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='enterprise-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.pass_context
+def enterprise_create(ctx, name):
+    """Add an enterprise to the VSD"""
+    params = {}
+    params['name'] = name
+    result = ctx.obj['nc'].post("enterprises" , params).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='enterprise-delete')
+@click.argument('enterprise-id', metavar='<enterprise ID>', required=True)
+@click.pass_context
+def enterprise_delete(ctx, enterprise_id):
+    """Delete a given enterprise"""
+    ctx.obj['nc'].delete("enterprises/%s/?responseChoice=1" %enterprise_id)
+
+@vsdcli.command(name='enterprise-update')
+@click.argument('enterprise-id', metavar='<enterprise ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def enterprise_update(ctx, enterprise_id, key_value):
+    """Update key/value for a given enterprise"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("enterprises/%s" %enterprise_id, params)
+    result = ctx.obj['nc'].get("enterprises/%s" %enterprise_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='domaintemplate-list')
+@click.argument('enterprise-id', metavar='<enterprise ID>', required=True)
+@click.pass_context
+def domaintemplate_list(ctx, enterprise_id):
+    """Show all domaintemplate for a given enterprise id"""
+    result = ctx.obj['nc'].get("enterprises/%s/domaintemplates" %enterprise_id).obj()
+    table=PrettyTable(["Domain Template ID", "Name"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'] ] )
+    print table
+
+@vsdcli.command(name='domaintemplate-show')
+@click.argument('domaintemplate-id', metavar='<domaintemplate-id>', required=True)
+@click.pass_context
+def domaintemplate_show(ctx, domaintemplate_id):
+    """Show information for a given domaintemplate id"""
+    result = ctx.obj['nc'].get("domaintemplates/%s" %domaintemplate_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='domaintemplate-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
+@click.pass_context
+def domaintemplate_create(ctx, name, enterprise_id):
+    """Add an domaintemplate to the VSD for an given enterprise"""
+    params = {'name' : name }
+    result = ctx.obj['nc'].post("enterprises/%s/domaintemplates" %enterprise_id, params).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='domaintemplate-delete')
+@click.argument('domaintemplate-id', metavar='<domaintemplate ID>', required=True)
+@click.pass_context
+def domaintemplate_delete(ctx, domaintemplate_id):
+    """Delete a given domaintemplate"""
+    ctx.obj['nc'].delete("domaintemplates/%s" %domaintemplate_id)
+
+@vsdcli.command(name='domaintemplate-update')
+@click.argument('domaintemplate-id', metavar='<domaintemplate ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def domaintemplate_update(ctx, domaintemplate_id, key_value):
+    """Update key/value for a given domaintemplate"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("domaintemplates/%s" %domaintemplate_id, params)
+    result = ctx.obj['nc'].get("domaintemplates/%s" %domaintemplate_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='domain-list')
+@click.argument('id', metavar='<ID>', required=True)
+@click.option('--id-type', type=click.Choice(['enterprise', 'domaintemplate']),
+              default='enterprise', help='Default : enterprise')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for serviceID, name, description, customerID, labelID, serviceID, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def domain_list(ctx, id, id_type, filter):
+    """Show domain for a given enterprise or domain id"""
+    if filter == None:
+        result = ctx.obj['nc'].get("%ss/%s/domains" %(id_type, id)).obj()
+    else :
+        result = ctx.obj['nc'].get("%ss/%s/domains" %(id_type, id), filter=filter).obj()
+    table=PrettyTable(["Domain ID", "Name", "Descrition", "RT / RD"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'],
+                        line['description'],
+                        line['routeTarget'] + " / " + line['routeDistinguisher'] ] )
+    print table
+
+@vsdcli.command(name='domain-show')
+@click.argument('domain-id', metavar='<domain-id>', required=True)
+@click.pass_context
+def domain_show(ctx, domain_id):
+    """Show information for a given domain id"""
+    result = ctx.obj['nc'].get("domains/%s" %domain_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='domain-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
+@click.option('--template-id', metavar='<template ID>', required=True)
+@click.option('--rd', metavar='<route distinguisher>')
+@click.option('--rt', metavar='<route target>')
+@click.pass_context
+def domain_create(ctx, name, enterprise_id, template_id, rt, rd):
+    """Add an domain to the VSD for an given enterprise"""
+    params = {'name' : name,
+        'templateID' : template_id }
+    if rt != None :
+        params['routeTarget'] = rt
+    if rd != None :
+        params['routeDistinguisher'] = rd
+    result = ctx.obj['nc'].post("enterprises/%s/domains" %enterprise_id, params).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='domain-delete')
+@click.argument('domain-id', metavar='<domain ID>', required=True)
+@click.pass_context
+def domain_delete(ctx, domain_id):
+    """Delete a given domain"""
+    ctx.obj['nc'].delete("domains/%s" %domain_id)
+
+@vsdcli.command(name='domain-update')
+@click.argument('domain-id', metavar='<domain ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def domain_update(ctx, domain_id, key_value):
+    """Update key/value for a given domain"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("domains/%s" %domain_id, params)
+    result = ctx.obj['nc'].get("domains/%s" %domain_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+
+@vsdcli.command(name='zone-list')
+@click.argument('domain-id', metavar='<domain ID>', required=True)
+@click.option('--filter', metavar='<filter>',
+              help='Filter for address, netmask, IPType, name, description, numberOfHostsInSubnets, publicZone, address, netmask, IPType, name, address, netmask, IPType, name, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def zone_list(ctx, domain_id, filter):
+    """Show zone for a given domain id"""
+    if filter == None:
+        result = ctx.obj['nc'].get("domains/%s/zones" %domain_id).obj()
+    else :
+        result = ctx.obj['nc'].get("domains/%s/zones" %domain_id, filter=filter).obj()
+    table=PrettyTable(["Zone ID", "Name" ])
+    for line in result:
+        table.add_row( [ line['ID'],
+                         line['name'] ] )
+    print table
+
+@vsdcli.command(name='zone-show')
+@click.argument('zone-id', metavar='<zone-id>', required=True)
+@click.pass_context
+def zone_show(ctx, zone_id):
+    """Show information for a given zone id"""
+    result = ctx.obj['nc'].get("zones/%s" %zone_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='zone-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--domain-id', metavar='<domain ID>', required=True)
+@click.pass_context
+def zone_create(ctx, name, domain_id ):
+    """Add a zone to the VSD for an given domain"""
+    params = {'name' : name }
+    result = ctx.obj['nc'].post("domains/%s/zones" %domain_id, params).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='zone-delete')
+@click.argument('zone-id', metavar='<zone ID>', required=True)
+@click.pass_context
+def zone_delete(ctx, zone_id):
+    """Delete a given zone"""
+    ctx.obj['nc'].delete("zones/%s" %zone_id)
+
+
+@vsdcli.command(name='subnet-list')
+@click.argument('id', metavar='<ID>', required=True)
+@click.option('--id-type',
+              type=click.Choice(['zone',
+                                'app',
+                                'subnettemplate',
+                                'domain']),
+              default='domain', help='Default : domain')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for address, netmask, IPType, name, gateway, description, serviceID, address, netmask, IPType, name, gateway, description, splitSubnet, proxyARP, address, netmask, IPType, name, gateway, description, address, netmask, IPType, name, address, netmask, IPType, name, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def subnet_list(ctx, id, id_type, filter):
+    """List subnets for a given zone, app, subnettemplate, or domain id"""
+    if filter == None:
+        result = ctx.obj['nc'].get("%ss/%s/subnets" %(id_type, id)).obj()
+    else :
+        result = ctx.obj['nc'].get("%ss/%s/subnets" %(id_type, id), filter=filter).obj()
+    table=PrettyTable(["Subnet ID", "Name", "Address", "Gateway", "RT / RD", "External ID"])
+    tableSubnet={
+        '0'   : 0,
+        '128' : 1,
+        '192' : 2,
+        '224' : 3,
+        '240' : 4,
+        '248' : 5,
+        '252' : 6,
+        '254' : 7,
+        '255' : 8,
+    }
+
+    for line in result:
+        if line['address'] != None:
+            netmask = str(line['netmask']).split('.')
+            subnetSize = tableSubnet[ netmask[0] ] + tableSubnet[ netmask[1] ] + \
+                tableSubnet[ netmask[2] ] + tableSubnet[ netmask[3] ]
+            address = line['address'] + "/" + str(subnetSize)
+        else:
+            address = "None"
+
+        table.add_row( [ line['ID'],
+                        line['name'],
+                        address,
+                        line['gateway'],
+                        line['routeTarget'] + " / " + line['routeDistinguisher'],
+                        line['externalID']
+                        ] )
+    print table
+
+@vsdcli.command(name='subnet-show')
+@click.argument('subnet-id', metavar='<subnet-id>', required=True)
+@click.pass_context
+def subnet_show(ctx, subnet_id):
+    """Show information for a given subnet id"""
+    result = ctx.obj['nc'].get("subnets/%s" %subnet_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+
+@vsdcli.command(name='subnet-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--zone-id', metavar='<zone ID>', required=True)
+@click.option('--address', metavar='<address>', required=True)
+@click.option('--netmask', metavar='<netmask>', required=True)
+@click.option('--gateway', metavar='<gateway>')
+@click.option('--rd', metavar='<route distinguisher>')
+@click.option('--rt', metavar='<route target>')
+@click.pass_context
+def subnet_create(ctx, name, zone_id, address, gateway, netmask, rt, rd ):
+    """Add a subnet to the VSD for an given zone"""
+
+    # Define mandotory values
+    params = {'name' : name,
+        'address' : address,
+        'netmask' : netmask }
+    # Define optionnal values
+    if gateway != None :
+        params['gateway'] = gateway
+    if rt != None :
+        params['routeTarget'] = rt
+    if rd != None :
+        params['routeDistinguisher'] = rd
+
+    result = ctx.obj['nc'].post("zones/%s/subnets" %zone_id, params).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='subnet-delete')
+@click.argument('subnet-id', metavar='<subnet ID>', required=True)
+@click.pass_context
+def subnet_delete(ctx, subnet_id):
+    """Delete a given subnet"""
+    ctx.obj['nc'].delete("subnets/%s" %subnet_id)
+
+@vsdcli.command(name='user-list')
+@click.argument('id', metavar='<ID>', required=True)
+@click.option('--id-type', type=click.Choice(['enterprise', 'group']),
+              default='enterprise', help='Default : enterprise')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for firstName, lastName, userName, email, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def user_list_list(ctx, id, id_type, filter):
+    """list users for a given enterprise or group id"""
+    if filter == None:
+        result = ctx.obj['nc'].get("%ss/%s/users" %(id_type, id)).obj()
+    else :
+        result = ctx.obj['nc'].get("%ss/%s/users" %(id_type, id), filter=filter).obj()
+    table=PrettyTable(["ID", "User name", "First name", "Last name", "Email"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['userName'],
+                        line['firstName'],
+                        line['lastName'],
+                        line['email'] ] )
+    print table
+
+@vsdcli.command(name='user-show')
+@click.argument('user-id', metavar='<user-id>', required=True)
+@click.pass_context
+def user_show(ctx, user_id):
+    """Show information for a given user id"""
+    result = ctx.obj['nc'].get("users/%s" %user_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='user-create')
+@click.argument('username', metavar='<username>', required=True)
+@click.option('--lastname', metavar='<lastname>', required=True)
+@click.option('--firstname', metavar='<firstname>', required=True)
+@click.option('--email', metavar='<email>', required=True)
+@click.option('--password', metavar='<password>', required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
+@click.pass_context
+def user_create(ctx, username, firstname, lastname, email, password, enterprise_id ):
+    """Add a user to the VSD"""
+    
+    import hashlib
+    
+    # Define mandotory values
+    params = {'userName' : username,
+        'firstName' : firstname,
+        'lastName'  : lastname,
+        'email'     : email,
+        'password'  : hashlib.sha1(password).hexdigest() }
+    
+    result = ctx.obj['nc'].post("enterprises/%s/users" %enterprise_id, params).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='user-delete')
+@click.argument('user-id', metavar='<user ID>', required=True)
+@click.pass_context
+def user_delete(ctx, user_id):
+    """Delete a given user"""
+    ctx.obj['nc'].delete("users/%s" %user_id)
+
+@vsdcli.command(name='user-update')
+@click.argument('user-id', metavar='<user ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def user_update(ctx, user_id, key_value):
+    """Update key/value for a given user"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("users/%s" %user_id, params)
+    result = ctx.obj['nc'].get("users/%s" %user_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+
+
+@vsdcli.command(name='group-list')
+@click.argument('id', metavar='<ID>', required=True)
+@click.option('--id-type', type=click.Choice(['enterprise', 'user']),
+              default='enterprise', help='Default : enterprise')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name, description, role, private, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def group_list(ctx, id, id_type, filter):
+    """list groups for a given enterprise id or that an user belongs to"""
+    if filter == None:
+        result = ctx.obj['nc'].get("%ss/%s/groups" %(id_type, id)).obj()
+    else :
+        result = ctx.obj['nc'].get("%ss/%s/groups" %(id_type, id), filter=filter).obj()
+    table=PrettyTable(["ID", "Name", "Description", "Role", "Private"])
+    table.max_width['Description'] = 40
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'],
+                        line['description'],
+                        line['role'],
+                        line['private'] ] )
+    print table
+
+@vsdcli.command(name='group-show')
+@click.argument('group-id', metavar='<group-id>', required=True)
+@click.pass_context
+def group_show(ctx, group_id):
+    """Show information for a given group id"""
+    result = ctx.obj['nc'].get("groups/%s" %group_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='group-create')
+@click.argument('name', metavar='<Group name>', required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
+@click.option('--description', metavar='<descrition>')
+@click.option('--private', metavar='<email>', count=True)
+@click.pass_context
+def group_create(ctx, name, enterprise_id , description, private ):
+    """Add a group to the VSD"""
+    
+    # Define mandotory values
+    params = {'name' : name }
+    # Define optional values
+    if description != None:
+        params['description'] = description
+    if private >= 1:
+        params['private'] = True
+    result = ctx.obj['nc'].post("enterprises/%s/groups" %enterprise_id, params).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='group-update')
+@click.argument('group-id', metavar='<group ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def group_update(ctx, group_id, key_value):
+    """Update key/value for a given group"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("groups/%s" %group_id, params)
+    result = ctx.obj['nc'].get("groups/%s" %group_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='group-add-user')
+@click.argument('group-id', metavar='<group ID>', required=True)
+@click.option('--user-id', metavar='<user ID>')
+@click.pass_context
+def group_add_user(ctx, group_id, user_id):
+    """Add a user to a given group"""
+    # Get all user for this group
+    userList = ctx.obj['nc'].get("groups/%s/users" %group_id ).obj()
+    user_ids = [u['ID'] for u in userList]
+    user_ids.append( user_id )
+    ctx.obj['nc'].put("groups/%s/users" %group_id, user_ids )
+
+@vsdcli.command(name='group-del-user')
+@click.argument('group-id', metavar='<group ID>', required=True)
+@click.option('--user-id', metavar='<user ID>')
+@click.pass_context
+def group_add_user(ctx, group_id, user_id):
+    """delete a user from a given group"""
+    # Get all user for this group
+    userList = ctx.obj['nc'].get("groups/%s/users" %group_id ).obj()
+    userPresent = 0
+    user_ids = []
+    for user in userList:
+        if user['ID'] != user_id:
+            user_ids.append( user['ID'] )
+        else:
+            userPresent = 1
+    if userPresent != 0:
+        ctx.obj['nc'].put("groups/%s/users" %group_id, user_ids )
+    else:
+        print "User not present in the group"
+
+@vsdcli.command(name='gateway-list')
+@click.option('--enterprise-id', metavar='<ID>')
+@click.option('--redundancygroup-id', metavar='<ID>')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for pending, systemID, name, description, personality, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def gateway_list_list(ctx, enterprise_id, redundancygroup_id, filter):
+    """list gateways for a given enterprise or group id"""
+    if enterprise_id != None:
+        url_request = "enterprises/%s/gateways" %enterprise_id
+    elif redundancygroup_id != None:
+        url_request = "redundancygroups/%s/gateways" %redundancygroup_id
+    else:
+        url_request = "gateways"
+
+    if filter == None:
+        result = ctx.obj['nc'].get( url_request ).obj()
+    else :
+        result = ctx.obj['nc'].get( url_request , filter=filter).obj()
+    table=PrettyTable(["ID", "System ID", "Name", "Description", "Pending", "Redundancy Group ID", "Personality"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['systemID'],
+                        line['name'],
+                        line['description'],
+                        line['pending'],
+                        line['redundancyGroupID'],
+                        line['personality'] ] )
+    print table
+
+@vsdcli.command(name='gateway-show')
+@click.argument('gateway-id', metavar='<gateway ID>', required=True)
+@click.pass_context
+def group_show(ctx, gateway_id):
+    """Show information for a given gateway ID"""
+    result = ctx.obj['nc'].get("gateways/%s" %gateway_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='gateway-update')
+@click.argument('gateway-id', metavar='<gateway ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def gateway_update(ctx, gateway_id, key_value):
+    """Update key/value for a given gateway"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("gateways/%s" %gateway_id, params)
+    result = ctx.obj['nc'].get("gateways/%s" %gateway_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='vsp-list')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for productVersion, name, description, location, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def vsp_list(ctx, filter):
+    """list all vsp"""
+    if filter == None:
+        result = ctx.obj['nc'].get("vsps/").obj()
+    else :
+        result = ctx.obj['nc'].get("vsps/", filter=filter).obj()
+    table=PrettyTable(["ID", "Name", "Description", "Version"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'],
+                        line['description'],
+                        line['productVersion'] ] )
+    print table
+
+@vsdcli.command(name='vsp-show')
+@click.argument('vsp-id', metavar='<vsp ID>', required=True)
+@click.pass_context
+def vsp_show(ctx, vsp_id):
+    """Show information for a given vsp ID"""
+    result = ctx.obj['nc'].get("vsps/%s" %vsp_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='vsd-list')
+@click.argument('vsp-id', metavar='<vsp ID>', required=True)
+@click.option('--filter', metavar='<filter>',
+              help='Filter for address, managementIP, name, location, description, productVersion, status, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def vsd_list(ctx, vsp_id, filter):
+    """List all vsd for a given vsp"""
+    if filter == None:
+        result = ctx.obj['nc'].get("vsps/%s/vsds" %vsp_id).obj()
+    else :
+        result = ctx.obj['nc'].get("vsps/%s/vsds" %vsp_id, filter=filter).obj()
+    table=PrettyTable(["ID", "Name", "Description", "Status", "Mode"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'],
+                        line['description'],
+                        line['status'],
+                        line['mode'] ] )
+    print table
+
+@vsdcli.command(name='vsd-show')
+@click.argument('vsd-id', metavar='<vsd ID>', required=True)
+@click.option('--verbose', count=True, help='Show disk informations')
+@click.pass_context
+def vsd_show(ctx, vsd_id, verbose):
+    """Show information for a given VSD ID"""
+    result = ctx.obj['nc'].get("vsds/%s" %vsd_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'], exclude=['disks'] )
+    if verbose >= 1:
+        print "Disks :"
+        print result['disks']
+
+
+if __name__ == '__main__':
+    vsdcli(obj={})
+
