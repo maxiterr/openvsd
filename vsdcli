@@ -1,4 +1,18 @@
 #!/usr/bin/env python
+
+######################################
+#
+# CLI for Nuage VSD
+#
+# Author : Maxime Terras
+# Mail : maxime.terras@numergy.com
+#
+#
+# Date : January 15th 2015
+#
+######################################
+
+
 import click
 from nuage import NuageConnection, NuageHTTPError, NuageResponse
 from prettytable import PrettyTable

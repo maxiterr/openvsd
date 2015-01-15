@@ -1,6 +1,0 @@
-export VSD_PASSWORD=csproot
-export VSD_PORT=8443
-export VSD_ENTERPRISE=csp
-export VSD_HOSTNAME=172.21.50.133
-export VSD_USERNAME=csproot
-
