@@ -1,0 +1,6 @@
+export VSD_PASSWORD=<password>
+export VSD_PORT=<port>
+export VSD_ENTERPRISE=csp
+export VSD_HOSTNAME=<IP address or fqdn>
+export VSD_USERNAME=<username>
+
