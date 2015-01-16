@@ -701,6 +701,46 @@ def vsd_show(ctx, vsd_id, verbose):
         print result['disks']
 
 
+@vsdcli.command(name='vm-list')
+@click.option('--id-type',
+              type=click.Choice(['egressacltemplate',
+                                'enterprise',
+                                'ingressacltemplate',
+                                'vrs',
+                                'vport',
+                                'zone',
+                                'l2domain',
+                                'app',
+                                'domain',
+                                'user',
+                                'subnet']),
+              help='Default : None')
+@click.option('--id')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for UUID, name, status, reasonType, hypervisorIP, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def vm_list(ctx, id, id_type, filter):
+    """List all VMs"""
+    request = "vms"
+    if id != None :
+        if id_type != None :
+            request = "%ss/%s/vms" %(id_type, id)
+    if filter == None :
+        result = ctx.obj['nc'].get(request).obj()
+    else :
+        result = ctx.obj['nc'].get(request, filter=filter).obj()
+    table=PrettyTable(["ID", "Vm UUID", "Name", "Status", "Hypervisor IP", "Reason Type"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['UUID'],
+                        line['name'],
+                        line['status'],
+                        line['hypervisorIP'],
+                        line['reasonType'] ] )
+    print table
+
+
+
 if __name__ == '__main__':
     vsdcli(obj={})
 
