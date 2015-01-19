@@ -701,6 +701,25 @@ def vsd_show(ctx, vsd_id, verbose):
         print result['disks']
 
 
+@vsdcli.command(name='vsd-componant-list')
+@click.argument('vsd-id', metavar='<vsd ID>', required=True)
+@click.pass_context
+def vsd_componant_list(ctx, vsd_id):
+    """List componant for a given VSD ID"""
+    result = ctx.obj['nc'].get("vsds/%s/components" %vsd_id).obj()
+    table=PrettyTable(["ID", "Name", "Description", "Status", "Address", "Version", "type"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'],
+                        line['description'],
+                        line['status'],
+                        line['address'],
+                        line['productVersion'],
+                        line['type'] ] )
+    print table
+
+
+
 @vsdcli.command(name='vm-list')
 @click.option('--id-type',
               type=click.Choice(['egressacltemplate',
