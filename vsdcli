@@ -784,6 +784,13 @@ def shared_network_list(ctx, filter):
                        ] )
     print table
 
+@vsdcli.command(name='shared-network-show')
+@click.argument('shared-network-id', metavar='<shared-network ID>', required=True)
+@click.pass_context
+def shared_network_show(ctx, shared_network_id):
+    """Show information for a given shared-network ID"""
+    result = ctx.obj['nc'].get("sharednetworkresources/%s" %shared_network_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
 
 
 if __name__ == '__main__':
