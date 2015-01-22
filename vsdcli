@@ -33,6 +33,23 @@ def print_object(obj, only=None, exclude=[]):
             table.add_row( [ key, obj[key] ] )
     print table
 
+def netmask_to_length(netmask):
+    tableSubnet={
+        '0'   : 0,
+        '128' : 1,
+        '192' : 2,
+        '224' : 3,
+        '240' : 4,
+        '248' : 5,
+        '252' : 6,
+        '254' : 7,
+        '255' : 8,
+    }
+    netmask_splited = str(netmask).split('.')
+    length = tableSubnet[ netmask_splited[0] ] + tableSubnet[ netmask_splited[1] ] + \
+                tableSubnet[ netmask_splited[2] ] + tableSubnet[ netmask_splited[3] ]
+    return str(length)
+
 @click.group()
 @click.option('--vsd-hostname',metavar='<hostname>', envvar='VSD_HOSTNAME',
               help='VSD address or fqdn (Env: VSD_HOSTNAME)', required=True )
@@ -756,6 +773,29 @@ def vm_list(ctx, id, id_type, filter):
                         line['status'],
                         line['hypervisorIP'],
                         line['reasonType'] ] )
+    print table
+
+@vsdcli.command(name='shared-network-list')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name, description, address, netmask, gateway, type, domainRouteDistinguisher, domainRouteTarget, externalID')
+@click.pass_context
+def shared_network_list(ctx, filter):
+    """List all shared network ressource"""
+    if filter == None :
+        result = ctx.obj['nc'].get("sharednetworkresources").obj()
+    else :
+        result = ctx.obj['nc'].get("sharednetworkresources", filter=filter).obj()
+    print netmask_to_length( "255.255.255.0" )
+    table=PrettyTable(["ID", "Name", "Description", "Type", "Address", "Gateway", "RT / RD" ])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'],
+                        line['description'],
+                        line['type'],
+                        line['address'] + "/" + netmask_to_length( line['netmask'] ),
+                        line['gateway'],
+                        line['domainRouteTarget'] + " / " + line['domainRouteDistinguisher']
+                       ] )
     print table
 
 
