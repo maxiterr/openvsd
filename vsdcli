@@ -821,6 +821,75 @@ def vporttag_list(ctx, id, id_type, filter):
                         line['endPointType'] ] )
     print table
 
+@vsdcli.command(name='l2domain-list')
+@click.argument('id', metavar='<ID>', required=True)
+@click.option('--id-type', type=click.Choice(['enterprise', 'l2domaintemplate']),
+              default='enterprise', help='Default : enterprise')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for description, name, serviceID, description, name, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def l2domain_list(ctx, id, id_type, filter):
+    """List L2 domain for a given enterprise or l2 domain template"""
+    if filter == None:
+        result = ctx.obj['nc'].get("%ss/%s/l2domains" %(id_type, id)).obj()
+    else :
+        result = ctx.obj['nc'].get("%ss/%s/l2domains" %(id_type, id), filter=filter).obj()
+    table=PrettyTable(["L2 Domain ID", "Name", "Descrition", "RT / RD"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['name'],
+                        line['description'],
+                        line['routeTarget'] + " / " + line['routeDistinguisher'] ] )
+    print table
+
+
+@vsdcli.command(name='l2domain-show')
+@click.argument('l2domain-id', metavar='<l2domain-id>', required=True)
+@click.pass_context
+def l2domain_show(ctx, l2domain_id):
+    """Show information for a given l2 domain id"""
+    result = ctx.obj['nc'].get("l2domains/%s" %l2domain_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='l2domain-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
+@click.option('--template-id', metavar='<template ID>', required=True)
+@click.option('--rd', metavar='<route distinguisher>')
+@click.option('--rt', metavar='<route target>')
+@click.pass_context
+def l2domain_create(ctx, name, enterprise_id, template_id, rt, rd):
+    """Add an l2 domain to the VSD for an given enterprise"""
+    params = {'name' : name,
+        'templateID' : template_id }
+    if rt != None :
+        params['routeTarget'] = rt
+    if rd != None :
+        params['routeDistinguisher'] = rd
+    result = ctx.obj['nc'].post("enterprises/%s/l2domains" %enterprise_id, params).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='l2domain-delete')
+@click.argument('l2domain-id', metavar='<l2domain ID>', required=True)
+@click.pass_context
+def l2domain_delete(ctx, domain_id):
+    """Delete a given l2 domain"""
+    ctx.obj['nc'].delete("l2domains/%s" %domain_id)
+
+@vsdcli.command(name='l2domain-update')
+@click.argument('l2domain-id', metavar='<domain ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def l2domain_update(ctx, l2domain_id, key_value):
+    """Update key/value for a given l2 domain"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("l2domains/%s" %l2domain_id, params)
+    result = ctx.obj['nc'].get("l2domains/%s" %l2domain_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
 
 if __name__ == '__main__':
     vsdcli(obj={})
