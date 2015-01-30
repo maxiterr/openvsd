@@ -793,6 +793,35 @@ def shared_network_show(ctx, shared_network_id):
     print_object( result, only=ctx.obj['show_only'] )
 
 
+@vsdcli.command(name='vporttag-list')
+@click.option('--id-type',
+              type=click.Choice(['bridgeinterface',
+                                'hostinterface',
+                                'vport',
+                                'domain',
+                                'l2domain',
+                                'vminterface']),
+              help='Default : None')
+@click.option('--id')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def vporttag_list(ctx, id, id_type, filter):
+    """List all vPort tag"""
+    request = "%ss/%s/vporttags" %(id_type, id)
+    if filter == None :
+        result = ctx.obj['nc'].get(request).obj()
+    else :
+        result = ctx.obj['nc'].get(request, filter=filter).obj()
+    table=PrettyTable(["ID", "Description", "Name", "endPoint Type" ])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['description'],
+                        line['name'],
+                        line['endPointType'] ] )
+    print table
+
+
 if __name__ == '__main__':
     vsdcli(obj={})
 
