@@ -17,7 +17,6 @@ import click
 from nuage import NuageConnection, NuageHTTPError, NuageResponse
 from prettytable import PrettyTable
 
-
 def print_object(obj, only=None, exclude=[]):
     if only :
         if only in obj:
@@ -30,6 +29,8 @@ def print_object(obj, only=None, exclude=[]):
 
     for key in obj.keys():
         if key not in exclude:
+            if (type(obj[key]) is list:
+                
             table.add_row( [ key, obj[key] ] )
     print table
 
@@ -760,6 +761,15 @@ def vm_list(ctx, id, id_type, filter):
                         line['hypervisorIP'],
                         line['reasonType'] ] )
     print table
+
+@vsdcli.command(name='vm-show')
+@click.argument('vm-id', metavar='<vm ID>', required=True)
+@click.pass_context
+def vm_show(ctx, vm_id):
+    """Show information for a given VM ID"""
+    result = ctx.obj['nc'].get("vms/%s" %vm_id).obj()[0]
+    print_object( result,exclude=['interfaces','resyncInfo'], only=ctx.obj['show_only'] )
+
 
 @vsdcli.command(name='shared-network-list')
 @click.option('--filter', metavar='<filter>',
