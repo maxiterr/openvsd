@@ -18,21 +18,37 @@ from nuage import NuageConnection, NuageHTTPError, NuageResponse
 from prettytable import PrettyTable
 
 def print_object(obj, only=None, exclude=[]):
-    if only :
+    def _format_multiple_values(values):
+        """Format list in string to be printable as prettytable"""
+        row_value = ""
+        if len(values) > 0:
+            last = values.pop()
+            for o in values:
+                row_value += "%s\n" % o
+            row_value += last
+        return row_value
+            
+
+    def _print_table(obj, exclude):
+        table = PrettyTable(["Field", "Value"])
+        table.align["Field"] = "l"
+
+        for key in obj.keys():
+            if key not in exclude:
+                if type(obj[key]) is list:
+                    table.add_row([key, _format_multiple_values(obj[key])])
+                else:
+                    table.add_row([key, obj[key]])
+        print table
+
+    if only:
         if only in obj:
             print obj[only]
-            return
-        else :
+        else:
             print "No such key : %s" %only
-    table = PrettyTable(["Field", "Value"])
-    table.align["Field"] = "l"
-
-    for key in obj.keys():
-        if key not in exclude:
-            if (type(obj[key]) is list:
-                
-            table.add_row( [ key, obj[key] ] )
-    print table
+    else:
+        _print_table(obj, exclude)
+            
 
 def netmask_to_length(netmask):
     tableSubnet={
