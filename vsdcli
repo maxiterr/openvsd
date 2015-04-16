@@ -916,6 +916,24 @@ def l2domain_update(ctx, l2domain_id, key_value):
     result = ctx.obj['nc'].get("l2domains/%s" %l2domain_id).obj()[0]
     print_object( result, only=ctx.obj['show_only'] )
 
+@vsdcli.command(name='floatingip-list')
+@click.argument('id', metavar='<domain ID>', required=True)
+@click.option('--filter', metavar='<filter>',
+              help='Filter for assigned, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def floatingip_list(ctx, id, filter):
+    """List floating IP for a given domain ID"""
+    if filter == None:
+        result = ctx.obj['nc'].get("domains/%s/floatingips" %id).obj()
+    else :
+        result = ctx.obj['nc'].get("domains/%s/floatingips" %id, filter=filter).obj()
+    table=PrettyTable(["ID", "address", "assigned", "externalID"])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['address'],
+                        line['assigned'],
+                        line['externalID'] ] )
+    print table
 
 if __name__ == '__main__':
     vsdcli(obj={})
