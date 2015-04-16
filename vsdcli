@@ -787,6 +787,50 @@ def vm_show(ctx, vm_id):
     print_object( result,exclude=['interfaces','resyncInfo'], only=ctx.obj['show_only'] )
 
 
+@vsdcli.command(name='vminterface-list')
+@click.option('--id-type',
+              type=click.Choice(['subnet',
+                                'zone',
+                                'vm',
+                                'vport',
+                                'domain']),
+              help='Default : None')
+@click.option('--id')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name, IPAddress, MAC, name, IPAddress, name, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def vminterfaces_list(ctx, id, id_type, filter):
+    """List VM interfaces"""
+    if (id != None and id_type == None) or (id == None and id_type != None):
+        raise Exception("Set id and id-type")
+
+    if id_type != None:
+        request = "%ss/%s/vminterfaces" %(id_type, id)
+    else:
+        request = "vminterfaces"
+    
+    if filter == None:
+        result = ctx.obj['nc'].get(request).obj()
+    else :
+        result = ctx.obj['nc'].get(request, filter=filter).obj()
+    table=PrettyTable(["ID", "VM UUID", "IP Address", "Netmask" , "Floating IP", "MAC" ])
+    for line in result:
+        table.add_row( [ line['ID'],
+                        line['VMUUID'],
+                        line['IPAddress'],
+                        line['netmask'],
+                        line['associatedFloatingIPAddress'],
+                        line['MAC'] ] )
+    print table
+
+@vsdcli.command(name='vminterface-show')
+@click.argument('vminterface-id', metavar='<vminterface ID>', required=True)
+@click.pass_context
+def vminterface_show(ctx, vminterface_id):
+    """Show information for a given VM interface ID"""
+    result = ctx.obj['nc'].get("vminterfaces/%s" %vminterface_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
 @vsdcli.command(name='shared-network-list')
 @click.option('--filter', metavar='<filter>',
               help='Filter for name, description, address, netmask, gateway, type, domainRouteDistinguisher, domainRouteTarget, externalID')
