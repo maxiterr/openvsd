@@ -935,6 +935,14 @@ def floatingip_list(ctx, id, filter):
                         line['externalID'] ] )
     print table
 
+@vsdcli.command(name='floatingip-show')
+@click.argument('floatingip-id', metavar='<floatingip-id>', required=True)
+@click.pass_context
+def floatingip_show(ctx, floatingip_id):
+    """Show information for a given floating IP id"""
+    result = ctx.obj['nc'].get("floatingips/%s" %floatingip_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
 if __name__ == '__main__':
     vsdcli(obj={})
 
