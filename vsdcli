@@ -786,6 +786,14 @@ def vm_show(ctx, vm_id):
     result = ctx.obj['nc'].get("vms/%s" %vm_id).obj()[0]
     print_object( result,exclude=['interfaces','resyncInfo'], only=ctx.obj['show_only'] )
 
+@vsdcli.command(name='vm-delete')
+@click.argument('vm-id', metavar='<vm ID>', required=True)
+@click.pass_context
+def vm_delete(ctx, vm_id):
+    """Delete VM for a given ID"""
+    result = ctx.obj['nc'].delete("vms/%s" %vm_id)
+
+
 
 @vsdcli.command(name='vminterface-list')
 @click.option('--id-type',
