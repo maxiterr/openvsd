@@ -815,8 +815,7 @@ def vminterfaces_list(ctx, id, id_type, filter):
     if id_type != None:
         request = "%ss/%s/vminterfaces" %(id_type, id)
     else:
-        request = "vminterfaces"
-    
+        request = "vminterfaces" 
     if filter == None:
         result = ctx.obj['nc'].get(request).obj()
     else :
@@ -861,6 +860,23 @@ def shared_network_list(ctx, filter):
                         line['domainRouteTarget'] + " / " + line['domainRouteDistinguisher']
                        ] )
     print table
+
+@vsdcli.command(name='vminterface-update')
+@click.argument('vminterface-id', metavar='<vminterface ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def vminterface_update(ctx, vminterface_id, key_value):
+    """Update key/value for a given vminterface"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("vminterfaces/%s" %vminterface_id, params)
+    result = ctx.obj['nc'].get("vminterfaces/%s" %vminterface_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+
+
 
 @vsdcli.command(name='shared-network-show')
 @click.argument('shared-network-id', metavar='<shared-network ID>', required=True)
