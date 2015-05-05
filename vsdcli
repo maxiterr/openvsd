@@ -143,6 +143,7 @@ def license_create(ctx, license):
 
 @vsdcli.command(name='license-delete')
 @click.argument('license-id', metavar='<license ID>', required=True)
+@click.confirmation_option(prompt='Are you sure ?')
 @click.pass_context
 def license_delete(ctx, license_id):
     """Delete a given license"""
@@ -179,7 +180,7 @@ def enterprise_create(ctx, name):
 
 @vsdcli.command(name='enterprise-delete')
 @click.argument('enterprise-id', metavar='<enterprise ID>', required=True)
-@click.confirmation_option(prompt='Are you sure')
+@click.confirmation_option(prompt='Are you sure ?')
 @click.pass_context
 def enterprise_delete(ctx, enterprise_id):
     """Delete a given enterprise"""
