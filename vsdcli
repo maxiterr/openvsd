@@ -271,19 +271,19 @@ def domaintemplate_update(ctx, domaintemplate_id, key_value):
     print_object( result, only=ctx.obj['show_only'] )
 
 @vsdcli.command(name='domain-list')
-@click.argument('id', metavar='<ID>', required=True)
-@click.option('--id-type', type=click.Choice(['enterprise', 'domaintemplate']),
-              default='enterprise', help='Default : enterprise')
+@click.option('--domaintemplate-id', metavar='<id>')
+@click.option('--enterprise-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for serviceID, name, description, customerID, labelID, serviceID, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def domain_list(ctx, id, id_type, filter):
+def domain_list(ctx, filter, **ids):
     """Show domain for a given enterprise or domain id"""
+    id_type, id = check_id(**ids)
     if filter == None:
         result = ctx.obj['nc'].get("%ss/%s/domains" %(id_type, id)).obj()
     else :
         result = ctx.obj['nc'].get("%ss/%s/domains" %(id_type, id), filter=filter).obj()
-    table=PrettyTable(["Domain ID", "Name", "Descrition", "RT / RD"])
+    table=PrettyTable(["Domain ID", "Name", "Description", "RT / RD"])
     for line in result:
         table.add_row( [ line['ID'],
                         line['name'],
@@ -383,18 +383,16 @@ def zone_delete(ctx, zone_id):
 
 
 @vsdcli.command(name='subnet-list')
-@click.argument('id', metavar='<ID>', required=True)
-@click.option('--id-type',
-              type=click.Choice(['zone',
-                                'app',
-                                'subnettemplate',
-                                'domain']),
-              default='domain', help='Default : domain')
+@click.option('--zone-id', metavar='<id>')
+@click.option('--domain-id', metavar='<id>')
+@click.option('--app-id', metavar='<id>')
+@click.option('--subnettemplate-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for address, netmask, IPType, name, gateway, description, serviceID, address, netmask, IPType, name, gateway, description, splitSubnet, proxyARP, address, netmask, IPType, name, gateway, description, address, netmask, IPType, name, address, netmask, IPType, name, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def subnet_list(ctx, id, id_type, filter):
+def subnet_list(ctx, filter, **ids):
     """List subnets for a given zone, app, subnettemplate, or domain id"""
+    id_type, id = check_id(**ids)
     if filter == None:
         result = ctx.obj['nc'].get("%ss/%s/subnets" %(id_type, id)).obj()
     else :
@@ -460,14 +458,14 @@ def subnet_delete(ctx, subnet_id):
     ctx.obj['nc'].delete("subnets/%s" %subnet_id)
 
 @vsdcli.command(name='user-list')
-@click.argument('id', metavar='<ID>', required=True)
-@click.option('--id-type', type=click.Choice(['enterprise', 'group']),
-              default='enterprise', help='Default : enterprise')
+@click.option('--enterprise-id', metavar='<id>')
+@click.option('--group-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for firstName, lastName, userName, email, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def user_list_list(ctx, id, id_type, filter):
+def user_list_list(ctx, filter, **ids):
     """list users for a given enterprise or group id"""
+    id_type, id = check_id(**ids)
     if filter == None:
         result = ctx.obj['nc'].get("%ss/%s/users" %(id_type, id)).obj()
     else :
@@ -536,14 +534,14 @@ def user_update(ctx, user_id, key_value):
 
 
 @vsdcli.command(name='group-list')
-@click.argument('id', metavar='<ID>', required=True)
-@click.option('--id-type', type=click.Choice(['enterprise', 'user']),
-              default='enterprise', help='Default : enterprise')
+@click.option('--enterprise-id', metavar='<id>')
+@click.option('--user-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for name, description, role, private, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def group_list(ctx, id, id_type, filter):
+def group_list(ctx, filter, **ids):
     """list groups for a given enterprise id or that an user belongs to"""
+    id_type, id = check_id(**ids)
     if filter == None:
         result = ctx.obj['nc'].get("%ss/%s/groups" %(id_type, id)).obj()
     else :
@@ -762,25 +760,23 @@ def vsd_componant_list(ctx, vsd_id):
 
 
 @vsdcli.command(name='vm-list')
-@click.option('--id-type',
-              type=click.Choice(['egressacltemplate',
-                                'enterprise',
-                                'ingressacltemplate',
-                                'vrs',
-                                'vport',
-                                'zone',
-                                'l2domain',
-                                'app',
-                                'domain',
-                                'user',
-                                'subnet']),
-              help='Default : None')
-@click.option('--id')
+@click.option('--egressacltemplate-id', metavar='<id>')
+@click.option('--enterprise-id', metavar='<id>')
+@click.option('--ingressacltemplate-id', metavar='<id>')
+@click.option('--vrs-id', metavar='<id>')
+@click.option('--vport-id', metavar='<id>')
+@click.option('--zone-id', metavar='<id>')
+@click.option('--l2domain-id', metavar='<id>')
+@click.option('--app-id', metavar='<id>')
+@click.option('--domain-id', metavar='<id>')
+@click.option('--user-id', metavar='<id>')
+@click.option('--subnet-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for UUID, name, status, reasonType, hypervisorIP, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def vm_list(ctx, id, id_type, filter):
+def vm_list(ctx, filter, **ids):
     """List all VMs"""
+    id_type, id = check_id(**ids)
     request = "vms"
     if id != None :
         if id_type != None :
@@ -817,19 +813,17 @@ def vm_delete(ctx, vm_id):
 
 
 @vsdcli.command(name='vminterface-list')
-@click.option('--id-type',
-              type=click.Choice(['subnet',
-                                'zone',
-                                'vm',
-                                'vport',
-                                'domain']),
-              help='Default : None')
-@click.option('--id')
+@click.option('--subnet-id', metavar='<id>')
+@click.option('--zone-id', metavar='<id>')
+@click.option('--vm-id', metavar='<id>')
+@click.option('--vport-id', metavar='<id>')
+@click.option('--domain-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for name, IPAddress, MAC, name, IPAddress, name, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def vminterfaces_list(ctx, id, id_type, filter):
+def vminterfaces_list(ctx, filter, **ids):
     """List VM interfaces"""
+    id_type, id = check_id(**ids)
     if (id != None and id_type == None) or (id == None and id_type != None):
         raise Exception("Set id and id-type")
 
@@ -909,20 +903,18 @@ def shared_network_show(ctx, shared_network_id):
 
 
 @vsdcli.command(name='vporttag-list')
-@click.option('--id-type',
-              type=click.Choice(['bridgeinterface',
-                                'hostinterface',
-                                'vport',
-                                'domain',
-                                'l2domain',
-                                'vminterface']),
-              help='Default : None')
-@click.option('--id')
+@click.option('--bridgeinterface-id', metavar='<id>')
+@click.option('--hostinterface-id', metavar='<id>')
+@click.option('--vport-id', metavar='<id>')
+@click.option('--domain-id', metavar='<id>')
+@click.option('--l2domain-id', metavar='<id>')
+@click.option('--vminterface-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def vporttag_list(ctx, id, id_type, filter):
+def vporttag_list(ctx, filter, **ids):
     """List all vPort tag"""
+    id_type, id = check_id(**ids)
     request = "%ss/%s/vporttags" %(id_type, id)
     if filter == None :
         result = ctx.obj['nc'].get(request).obj()
@@ -937,19 +929,19 @@ def vporttag_list(ctx, id, id_type, filter):
     print table
 
 @vsdcli.command(name='l2domain-list')
-@click.argument('id', metavar='<ID>', required=True)
-@click.option('--id-type', type=click.Choice(['enterprise', 'l2domaintemplate']),
-              default='enterprise', help='Default : enterprise')
+@click.option('--l2domaintemplate-id', metavar='<id>')
+@click.option('--enterprise-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for description, name, serviceID, description, name, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def l2domain_list(ctx, id, id_type, filter):
+def l2domain_list(ctx, filter, **ids):
     """List L2 domain for a given enterprise or l2 domain template"""
+    id_type, id = check_id(**ids)
     if filter == None:
         result = ctx.obj['nc'].get("%ss/%s/l2domains" %(id_type, id)).obj()
     else :
         result = ctx.obj['nc'].get("%ss/%s/l2domains" %(id_type, id), filter=filter).obj()
-    table=PrettyTable(["L2 Domain ID", "Name", "Descrition", "RT / RD"])
+    table=PrettyTable(["L2 Domain ID", "Name", "Description", "RT / RD"])
     for line in result:
         table.add_row( [ line['ID'],
                         line['name'],
@@ -1033,24 +1025,22 @@ def floatingip_show(ctx, floatingip_id):
     print_object( result, only=ctx.obj['show_only'] )
 
 @vsdcli.command(name='permission-list')
-@click.option('--id-type',
-              type=click.Choice(['domaintemplate',
-                                'zone',
-                                'redundancygroup',
-                                'gateway',
-                                'vlan',
-                                'domain',
-                                'service',
-                                'port',
-                                'l2domain',
-                                'l2domaintemplate']),
-              help='Default : None')
-@click.option('--id')
+@click.option('--zone-id', metavar='<id>')
+@click.option('--domaintemplate-id', metavar='<id>')
+@click.option('--redundancygroup-id', metavar='<id>')
+@click.option('--gateway-id', metavar='<id>')
+@click.option('--vlan-id', metavar='<id>')
+@click.option('--domain-id', metavar='<id>')
+@click.option('--service-id', metavar='<id>')
+@click.option('--port-id', metavar='<id>')
+@click.option('--l2domain-id', metavar='<id>')
+@click.option('--l2domaintemplate-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for name, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def permission_list(ctx, id, id_type, filter):
+def permission_list(ctx, filter, **ids):
     """List all permissions"""
+    id_type, id = check_id(**ids)
     request = "%ss/%s/permissions" %(id_type, id)
     if filter == None :
         result = ctx.obj['nc'].get(request).obj()
