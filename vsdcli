@@ -1098,8 +1098,6 @@ def add_permission(ctx, entity_id, action, **ids):
     params = {}
     params['permittedEntityID'] = entity_id
     params['permittedAction'] = action
-    print params
-    print("%ss/%s/permissions" %(id_type, id))
     ctx.obj['nc'].post("%ss/%s/permissions" %(id_type, id), params)
 
 
