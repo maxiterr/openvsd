@@ -67,6 +67,26 @@ def netmask_to_length(netmask):
                 tableSubnet[ netmask_splited[2] ] + tableSubnet[ netmask_splited[3] ]
     return str(length)
 
+def check_id(**ids):
+    # Remove '_id' at the end of key names
+    new_ids = {}
+    for k, v in ids.items():
+        k = '_'.join(k.split('_')[0:-1])
+        new_ids[k] = v
+    ids = new_ids
+
+    # Check one and only one id is specified
+    nb_ids = 0
+    for k, v in ids.items():
+        if v is not None:
+            nb_ids += 1
+            good_k = k
+    if nb_ids != 1:
+        raise click.exceptions.UsageError(
+            "You must specify only one id in %s" % ids.keys())
+
+    return good_k, ids[good_k]
+
 @click.group()
 @click.option('--vsd-hostname',metavar='<hostname>', envvar='VSD_HOSTNAME',
               help='VSD address or fqdn (Env: VSD_HOSTNAME)', required=True )
@@ -83,7 +103,6 @@ def netmask_to_length(netmask):
 @click.pass_context
 def vsdcli(ctx, vsd_hostname, vsd_username, vsd_password, vsd_enterprise, vsd_port, show_only):
     """Command-line interface to the VSD APIs"""
-
     nc = NuageConnection( vsd_hostname,
                           enterprise=vsd_enterprise,
                           username=vsd_username,
@@ -1012,6 +1031,77 @@ def floatingip_show(ctx, floatingip_id):
     """Show information for a given floating IP id"""
     result = ctx.obj['nc'].get("floatingips/%s" %floatingip_id).obj()[0]
     print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='permission-list')
+@click.option('--id-type',
+              type=click.Choice(['domaintemplate',
+                                'zone',
+                                'redundancygroup',
+                                'gateway',
+                                'vlan',
+                                'domain',
+                                'service',
+                                'port',
+                                'l2domain',
+                                'l2domaintemplate']),
+              help='Default : None')
+@click.option('--id')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def permission_list(ctx, id, id_type, filter):
+    """List all permissions"""
+    request = "%ss/%s/permissions" %(id_type, id)
+    if filter == None :
+        result = ctx.obj['nc'].get(request).obj()
+    else :
+        result = ctx.obj['nc'].get(request, filter=filter).obj()
+    table=PrettyTable(["ID", "Action", "Entity ID", "Entity type", "Entity name"])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['permittedAction'],
+                       line['permittedEntityID'],
+                       line['permittedEntityType'],
+                       line['permittedEntityName'] ] )
+    print table
+
+@vsdcli.command(name='permission-show')
+@click.argument('permission-id', metavar='<permission-id>', required=True)
+@click.pass_context
+def permission_show(ctx, permission_id):
+    """Show information for a given permission id"""
+    result = ctx.obj['nc'].get("permissions/%s" %permission_id).obj()[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+@vsdcli.command(name='add-permission')
+@click.argument('entity-id', metavar='<group or user ID>', required=True)
+@click.option('--action', type=click.Choice(['USE',
+                                             'EXTEND',
+                                             'READ',
+                                             'INSTANTIATE']),
+              default='USE', help='Default : USE')
+@click.option('--zone-id', metavar='<id>')
+@click.option('--domaintemplate-id', metavar='<id>')
+@click.option('--redundancygroup-id', metavar='<id>')
+@click.option('--gateway-id', metavar='<id>')
+@click.option('--vlan-id', metavar='<id>')
+@click.option('--domain-id', metavar='<id>')
+@click.option('--service-id', metavar='<id>')
+@click.option('--port-id', metavar='<id>')
+@click.option('--l2domain-id', metavar='<id>')
+@click.option('--l2domaintemplate-id', metavar='<id>')
+@click.option('--zone-id', metavar='<id>')
+@click.pass_context
+def add_permission(ctx, entity_id, action, **ids):
+    """Add permission for a given element (Domain, Zone, L2Domain, etc...)"""
+    id_type, id = check_id(**ids)
+    params = {}
+    params['permittedEntityID'] = entity_id
+    params['permittedAction'] = action
+    print params
+    print("%ss/%s/permissions" %(id_type, id))
+    ctx.obj['nc'].post("%ss/%s/permissions" %(id_type, id), params)
+
 
 if __name__ == '__main__':
     vsdcli(obj={})
