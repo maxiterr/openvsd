@@ -450,6 +450,20 @@ def subnet_create(ctx, name, zone_id, address, gateway, netmask, rt, rd ):
     result = ctx.obj['nc'].post("zones/%s/subnets" %zone_id, params).obj()[0]
     print_object( result, only=ctx.obj['show_only'] )
 
+@vsdcli.command(name='subnet-update')
+@click.argument('subnet-id', metavar='<subnet ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def subnet_update(ctx, subnet_id, key_value):
+    """Update key/value for a given subnet"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("subnets/%s" %subnet_id, params)
+    result = ctx.obj['nc'].get("subnets/%s" %subnet_id)[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
 @vsdcli.command(name='subnet-delete')
 @click.argument('subnet-id', metavar='<subnet ID>', required=True)
 @click.pass_context
