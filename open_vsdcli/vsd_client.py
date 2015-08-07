@@ -17,9 +17,10 @@ class VSDConnection(object):
 
     def _do_request(self, method, url, headers=None, params=None):
         import requests
+        requests.packages.urllib3.disable_warnings()
         try:
             data = json.dumps(params) if params else None
-            return requests.request(method, url, headers=headers, verify=False, timeout=2, data=data)
+            return requests.request(method, url, headers=headers, verify=False, timeout=10, data=data)
         except requests.exceptions.RequestException as error:
             print 'Error: Unable to connect.'
             print 'Detail: %s' % error
