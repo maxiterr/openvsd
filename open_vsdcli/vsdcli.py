@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 ######################################
 #
 # CLI for Nuage VSD
@@ -1103,7 +1101,9 @@ def add_permission(ctx, entity_id, action, **ids):
     params['permittedAction'] = action
     ctx.obj['nc'].post("%ss/%s/permissions" %(id_type, id), params)
 
+def main():
+    vsdcli(obj={})
 
 if __name__ == '__main__':
-    vsdcli(obj={})
+    main()
 
