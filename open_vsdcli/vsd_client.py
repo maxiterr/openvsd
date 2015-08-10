@@ -5,7 +5,7 @@ import base64
 
 
 class VSDConnection(object):
-    def __init__(self, username, password, enterprise, base_url):
+    def __init__(self, username, password, enterprise, base_url, debug=False):
         self.base_url = base_url
         self.username = username
         self.headers = {
@@ -14,17 +14,35 @@ class VSDConnection(object):
             'Content-Type' : "application/json",
             'X-Nuage-Organization' : enterprise
         }
+        self.debug = debug
 
     def _do_request(self, method, url, headers=None, params=None):
         import requests
         requests.packages.urllib3.disable_warnings()
         try:
             data = json.dumps(params) if params else None
-            return requests.request(method, url, headers=headers, verify=False, timeout=10, data=data)
+            if self.debug:
+                print '#####################################################'
+                print '# Request'
+                print '# Method: %s' % method
+                print '# URL: %s' % url
+                print '# Headers: %s' % json.dumps(headers)
+                print '# Parameters: %s' % data
+                print '#####################################################'
+            response = requests.request(method, url, headers=headers, verify=False, timeout=10, data=data)
         except requests.exceptions.RequestException as error:
             print 'Error: Unable to connect.'
             print 'Detail: %s' % error
             raise SystemExit(1)
+        if self.debug:
+            print '# Response'
+            print '# Status code: %s' % response
+            print '# Headers: %s' % response.headers
+            print '# Body: %s' % response.text
+            print '#####################################################'
+            print ''
+        return response
+
 
     def _response(self, resp):
         if resp.status_code == 401:

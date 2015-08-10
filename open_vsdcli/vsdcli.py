@@ -96,14 +96,16 @@ def check_id(**ids):
               help='VSD Authentication enterprise (Env: VSD_ENTERPRISE)', required=True )
 @click.option('--show-only',metavar='<key>',
               help='Show only the value for a given key (usable for show and create command)' )
+@click.option('--debug', is_flag=True, help='Active debug for request and response')
 @click.pass_context
-def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise, vsd_url, show_only):
+def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise, vsd_url, show_only, debug):
     """Command-line interface to the VSD APIs"""
     nc = VSDConnection(
             vsd_username,
             vsd_password,
             vsd_enterprise,
-            vsd_url
+            vsd_url,
+            debug=debug
          )
     ctx.obj['nc'] = nc
     ctx.obj['show_only'] = show_only
