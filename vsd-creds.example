@@ -1,6 +1,4 @@
 export VSD_PASSWORD=<password>
-export VSD_PORT=<port>
+export VSD_URL=https://<host>:<port>/nuage/api/v1_0/
 export VSD_ENTERPRISE=csp
-export VSD_HOSTNAME=<IP address or fqdn>
 export VSD_USERNAME=<username>
-

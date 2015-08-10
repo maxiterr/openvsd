@@ -86,26 +86,24 @@ def check_id(**ids):
     return good_k, ids[good_k]
 
 @click.group()
-@click.option('--vsd-hostname',metavar='<hostname>', envvar='VSD_HOSTNAME',
-              help='VSD address or fqdn (Env: VSD_HOSTNAME)', required=True )
+@click.option('--vsd-url', metavar='<url>', envvar='VSD_URL',
+              help='VSD url http(s)://hostname:port/nuage/api_v1_0 (Env: VSD_URL)', required=True)
 @click.option('--vsd-username',metavar='<username>', envvar='VSD_USERNAME',
               help='VSD Authentication username (Env: VSD_USERNAME)', required=True )
 @click.option('--vsd-password',metavar='<password>', envvar='VSD_PASSWORD',
               help='VSD Authentication password (Env: VSD_PASSWORD)', required=True )
 @click.option('--vsd-enterprise',metavar='<enterprise>', envvar='VSD_ENTERPRISE',
               help='VSD Authentication enterprise (Env: VSD_ENTERPRISE)', required=True )
-@click.option('--vsd-port',metavar='<port>', envvar='VSD_PORT', type=int,
-              help='VSD port (Env: VSD_PORT)', required=True )
 @click.option('--show-only',metavar='<key>',
               help='Show only the value for a given key (usable for show and create command)' )
 @click.pass_context
-def vsdcli(ctx, vsd_hostname, vsd_username, vsd_password, vsd_enterprise, vsd_port, show_only):
+def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise, vsd_url, show_only):
     """Command-line interface to the VSD APIs"""
     nc = VSDConnection(
             vsd_username,
             vsd_password,
             vsd_enterprise,
-            'https://%s:%s/nuage/api/v1_0/' % (vsd_hostname, vsd_port)
+            vsd_url
          )
     ctx.obj['nc'] = nc
     ctx.obj['show_only'] = show_only
