@@ -1,4 +1,8 @@
 /vsd-creds
-/*.pyc
+*.pyc
 /MANIFEST
 /dist/
+/tests/mock_access.log
+/*.egg*/
+/.venv/
+/.cache/
