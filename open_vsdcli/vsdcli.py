@@ -97,15 +97,17 @@ def check_id(**ids):
 @click.option('--show-only',metavar='<key>',
               help='Show only the value for a given key (usable for show and create command)' )
 @click.option('--debug', is_flag=True, help='Active debug for request and response')
+@click.option('--force-auth', is_flag=True, help='Do not use existing APIkey. Replay authentication')
 @click.pass_context
-def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise, vsd_url, show_only, debug):
+def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise, vsd_url, show_only, debug, force_auth):
     """Command-line interface to the VSD APIs"""
     nc = VSDConnection(
             vsd_username,
             vsd_password,
             vsd_enterprise,
             vsd_url,
-            debug=debug
+            debug=debug,
+            force_auth=force_auth
          )
     ctx.obj['nc'] = nc
     ctx.obj['show_only'] = show_only
