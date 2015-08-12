@@ -5,7 +5,7 @@ import base64
 
 
 class VSDConnection(object):
-    def __init__(self, username, password, enterprise, base_url, debug=False):
+    def __init__(self, username, password, enterprise, base_url, debug=False, force_auth=False):
         self.base_url = base_url
         self.username = username
         self.headers = {
@@ -15,6 +15,8 @@ class VSDConnection(object):
             'X-Nuage-Organization' : enterprise
         }
         self.debug = debug
+        self.force_auth = force_auth
+
 
     def _do_request(self, method, url, headers=None, params=None):
         import requests
@@ -88,8 +90,7 @@ class VSDConnection(object):
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
         do_auth = False
-    
-        if os.path.exists(APIKey_file):
+        if os.path.exists(APIKey_file) and not self.force_auth:
             with open(APIKey_file) as data_file:
                 api_session = json.load(data_file)
             # replay auth if expire
