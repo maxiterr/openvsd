@@ -78,6 +78,9 @@ def get_object_id(obj_name, key, value):
 
 @app.route("/nuage/api/v1_0/me", methods=['GET'])
 def me_show():
+    print request.headers.get('Authorization')
+    if request.headers.get('Authorization') != "XREST dGVzdDp0ZXN0":
+        return make_response("<html><head><title>JBoss - Error report</head></html>", '401')
     reply = [{'firstName': 'csproot',
               'enterpriseName': 'CSP',
               'APIKey':'02a99c64-a09a-46d7',

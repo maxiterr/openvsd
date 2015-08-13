@@ -73,6 +73,13 @@ setup() {
 }
 
 
+@test "Make wrong authentication" {
+    run vsd --vsd-username zedzedzed me-show
+    [ "$status" -ne 0 ]
+    [ "${lines[0]}" = "Error: Athentication failed. Please verify your credentials." ]
+}
+
+
 @test "enterprise-list" {
     run vsd enterprise-list
     [ "$status" -eq 0 ]
