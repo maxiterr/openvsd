@@ -75,7 +75,7 @@ class VSDConnection(object):
 
     def delete(self, url):
         self.authenticate()
-        r = self._do_request('DELETE', self.base_url + "me", headers=self.headers)
+        r = self._do_request('DELETE', self.base_url + url, headers=self.headers)
         return self._response(r)
 
     def me(self):
