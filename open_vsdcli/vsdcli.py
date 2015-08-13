@@ -168,10 +168,12 @@ def license_delete(ctx, license_id):
     ctx.obj['nc'].delete("licenses/%s" %license_id)
 
 @vsdcli.command(name='enterprise-list')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name, description, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def enterprise_list(ctx):
+def enterprise_list(ctx, filter):
     """Show all enterprise within the VSD"""
-    result = ctx.obj['nc'].get("enterprises")
+    result = ctx.obj['nc'].get("enterprises", filter=filter)
     table=PrettyTable(["Enterprise ID", "Name"])
     for line in result:
         table.add_row( [ line['ID'],

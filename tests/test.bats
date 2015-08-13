@@ -88,6 +88,14 @@ setup() {
 }
 
 
+@test "enterprise-list with --filter" {
+    run vsd enterprise-list --filter 92a76e6f-2ac4
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e *| *nulab-1.*") -ne 0  ]
+    [ $(expr "${output}" : ".*5b2cc2f3-2b86-42ec-892d-edde741b2fd4 *| *nulab-2.*") -eq 0  ]
+}
+
+
 @test "enterprise-show" {
     run vsd enterprise-show 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
     [ "$status" -eq 0 ]

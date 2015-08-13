@@ -76,6 +76,18 @@ def get_object_id(obj_name, key, value):
     return {}
 
 
+def filter_objets(obj_name, filter):
+    if filter is None:
+        return database[obj_name]
+    ret = []
+    for object in database[obj_name]:
+        for k in object.keys():
+            if filter in object[k]:
+                ret.append(object)
+                continue
+    return ret
+
+
 @app.route("/nuage/api/v1_0/me", methods=['GET'])
 def me_show():
     print request.headers.get('Authorization')
@@ -91,7 +103,8 @@ def me_show():
 
 @app.route("/nuage/api/v1_0/<obj_name>", methods=['GET'])
 def object_list(obj_name):
-    return json.dumps(database[obj_name])
+    filter = request.headers.get('X-Nuage-Filter')
+    return json.dumps(filter_objets(obj_name, filter))
 
 
 @app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['GET'])
