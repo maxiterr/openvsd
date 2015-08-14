@@ -55,12 +55,12 @@ database.update(
                             'descriptions':  [
                                 {
                                     'title': 'Object not found',
-                                    'description': 'Cannot find object with ID '
+                                    'description': 'Cannot find object with ID'
                                 }
                             ]
                         }
                     ],
-                    'description': 'Cannot find enterprise with ID'
+                    'description': 'Cannot find object with ID'
                 }
             }
         ]
@@ -69,6 +69,8 @@ database.update(
 
 
 def get_object_id(obj_name, key, value):
+    if obj_name not in database:
+        return {}
     for object in database[obj_name]:
         if key in object:
             if object[key] == value:
@@ -77,9 +79,11 @@ def get_object_id(obj_name, key, value):
 
 
 def filter_objets(obj_name, filter):
+    ret = []
+    if obj_name not in database:
+        return ret
     if filter is None:
         return database[obj_name]
-    ret = []
     for object in database[obj_name]:
         for k in object.keys():
             if filter in object[k]:
@@ -90,7 +94,6 @@ def filter_objets(obj_name, filter):
 
 @app.route("/nuage/api/v1_0/me", methods=['GET'])
 def me_show():
-    print request.headers.get('Authorization')
     if request.headers.get('Authorization') != "XREST dGVzdDp0ZXN0":
         return make_response("<html><head><title>JBoss - Error report</head></html>", '401')
     reply = [{'firstName': 'csproot',
@@ -112,6 +115,17 @@ def object_show(obj_name, obj_id):
     return json.dumps([get_object_id(obj_name, 'ID', obj_id)])
 
 
+@app.route("/nuage/api/v1_0/<parent_name>/<parent_id>/<obj_name>", methods=['GET'])
+def object_list_with_parent(parent_name, parent_id, obj_name):
+    # Check parent exist but don't check parent own objects
+    data_src = get_object_id(parent_name, 'ID', parent_id)
+    if data_src == {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'not found')['message']), '404')
+    filter = request.headers.get('X-Nuage-Filter')
+    return json.dumps(filter_objets(obj_name, filter))
+
+
 @app.route("/nuage/api/v1_0/<obj_name>", methods=['POST'])
 def object_create(obj_name):
     data_update = json.loads(request.data)
@@ -122,6 +136,28 @@ def object_create(obj_name):
     new = {'name': data_update['name'],
            'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
            'description': 'None'}
+    database[obj_name].append(new)
+    return json.dumps([get_object_id(obj_name, 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
+
+
+@app.route("/nuage/api/v1_0/<parent_name>/<parent_id>/<obj_name>", methods=['POST'])
+def object_create_with_parent(parent_name, parent_id, obj_name):
+    data_update = json.loads(request.data)
+    # Check parent exist but don't check parent own objects
+    data_src = get_object_id(parent_name, 'ID', parent_id)
+    if data_src == {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'not found')['message']), '404')
+
+    data_src = get_object_id(obj_name, 'name', data_update['name'])
+    if data_src != {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'already exists')['message']), '409')
+    new = {'name': data_update['name'],
+           'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
+           'description': 'None'}
+    if obj_name not in database:
+        database.update({obj_name:[]})
     database[obj_name].append(new)
     return json.dumps([get_object_id(obj_name, 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
 
