@@ -112,8 +112,35 @@ setup() {
 }
 
 
-@test "Re-try create new-enterprise should failled" {
+@test "Re-try create new-enterprise must fail" {
     run vsd enterprise-create new-enterprise
     [ "$status" -ne 0 ]
     [  $(expr "${lines[0]}" : "Error: Object already exists.") -ne 0 ]
+}
+
+
+@test "Delete existing enterprise" {
+    run vsd enterprise-delete 255d9673-7281-43c4-be57-fdec677f6e07 --yes
+    [ "$status" -eq 0 ]
+    [  "x${output}" == "x" ]
+}
+
+@test "Delete non existing enterprise" {
+    run vsd enterprise-delete 255d9673-7281-43c4-be57-fdec677f6e07 --yes
+    [ "$status" -ne 0 ]
+    [  $(expr "${lines[0]}" : "Error: Cannot find object with ID") -ne 0 ]
+}
+
+
+@test "Create enterprise new-enterprise with show-only" {
+    run vsd --show-only ID enterprise-create new-enterprise
+    [ "$status" -eq 0 ]
+    [ ${lines[0]} == "255d9673-7281-43c4-be57-fdec677f6e07"  ]
+}
+
+
+@test "Update enterprise name" {
+    run vsd enterprise-update 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --key-value name:nulab-update
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*name *| *nulab-update .*") -ne 0  ]
 }

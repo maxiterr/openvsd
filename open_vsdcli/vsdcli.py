@@ -204,7 +204,7 @@ def enterprise_create(ctx, name):
 @click.pass_context
 def enterprise_delete(ctx, enterprise_id):
     """Delete a given enterprise"""
-    ctx.obj['nc'].delete("enterprises/%s/?responseChoice=1" %enterprise_id)
+    ctx.obj['nc'].delete("enterprises/%s?responseChoice=1" %enterprise_id)
 
 @vsdcli.command(name='enterprise-update')
 @click.argument('enterprise-id', metavar='<enterprise ID>', required=True)
