@@ -45,6 +45,23 @@ database.update(
                     ],
                     'internalErrorCode': 2002
                 }
+            },
+            {
+                'name': 'not found',
+                'message':  {
+                    'errors':  [
+                        {
+                            'property': '',
+                            'descriptions':  [
+                                {
+                                    'title': 'Object not found',
+                                    'description': 'Cannot find object with ID '
+                                }
+                            ]
+                        }
+                    ],
+                    'description': 'Cannot find enterprise with ID'
+                }
             }
         ]
     }
@@ -70,34 +87,44 @@ def me_show():
 
 
 @app.route("/nuage/api/v1_0/<obj_name>", methods=['GET'])
-def enterprises_list(obj_name):
+def object_list(obj_name):
     return json.dumps(database[obj_name])
 
 
-@app.route("/nuage/api/v1_0/enterprises/<ent_id>", methods=['GET'])
-def enterprises_show(ent_id):
-    return json.dumps([get_object_id('enterprises', 'ID', ent_id)])
+@app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['GET'])
+def object_show(obj_name, obj_id):
+    return json.dumps([get_object_id(obj_name, 'ID', obj_id)])
 
 
-@app.route("/nuage/api/v1_0/enterprises", methods=['POST'])
-def enterprises_create():
+@app.route("/nuage/api/v1_0/<obj_name>", methods=['POST'])
+def object_create(obj_name):
     data_update = json.loads(request.data)
-    data_src = get_object_id('enterprises', 'name', data_update['name'])
-    if len(data_src) != 0:
+    data_src = get_object_id(obj_name, 'name', data_update['name'])
+    if data_src != {}:
         return make_response(json.dumps(
             get_object_id('messages', 'name', 'already exists')['message']), '409')
     new = {'name': data_update['name'],
            'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
            'description': 'None'}
-    database['enterprises'].append(new)
-    return json.dumps([get_object_id('enterprises', 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
+    database[obj_name].append(new)
+    return json.dumps([get_object_id(obj_name, 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
 
 
-@app.route("/nuage/api/v1_0/enterprises/<ent_id>", methods=['PUT'])
-def enterprises_update():
+@app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['PUT'])
+def object_update(obj_name, obj_id):
     data_update = json.loads(request.data)
-    data_src = get_object_id('enterprises', 'ID', ent_id)
+    data_src = get_object_id(obj_name, 'ID', obj_id)
     data_src.update(data_update)
+    return '{}'
+
+
+@app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['DELETE'])
+def object_delete(obj_name, obj_id):
+    data_src = get_object_id(obj_name, 'ID', obj_id)
+    if data_src == {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'not found')['message']), '404')
+    database[obj_name].remove(data_src)
     return '{}'
 
 
