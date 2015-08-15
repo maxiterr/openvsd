@@ -149,14 +149,14 @@ def license_show(ctx, license_id, verbose):
     result = ctx.obj['nc'].get("licenses/%s" %license_id)[0]
     print_object( result, exclude=['license'], only=ctx.obj['show_only'] )
     if verbose >= 1:
-        print "License : " + result['license']
+        print "License: " + result['license']
 
 @vsdcli.command(name='license-create')
 @click.argument('license', metavar='<license (Base64)>', required=True)
 @click.pass_context
 def license_create(ctx, license):
     """Add a license to the VSD"""
-    result = ctx.obj['nc'].post("licenses/" , { "license": license })[0]
+    result = ctx.obj['nc'].post("licenses" , { "license": license })[0]
     print_object( result, exclude=['license'], only=ctx.obj['show_only'] )
 
 @vsdcli.command(name='license-delete')

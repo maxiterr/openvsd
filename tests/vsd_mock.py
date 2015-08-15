@@ -126,6 +126,28 @@ def object_list_with_parent(parent_name, parent_id, obj_name):
     return json.dumps(filter_objets(obj_name, filter))
 
 
+@app.route("/nuage/api/v1_0/licenses", methods=['POST'])
+def license_create():
+    data_update = json.loads(request.data)
+    if 'licenses' not in database:
+        database.update({'licenses':[]})
+    data_src = get_object_id('licenses', 'license', data_update['license'])
+    if data_src != {}:
+        return make_response(json.dumps(
+        get_object_id('messages', 'name', 'already exists')['message']), '409')
+    new = {'license': data_update['license'],
+           'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
+           'description': 'None',
+           'company': 'Compagny-1',
+           'allowedNICsCount': '100',
+           'allowedVMsCount': '100',
+           'productVersion': '2',
+           'majorRelease': '6',
+           'expirationDate': 1500000000000}
+    database['licenses'].append(new)
+    return json.dumps([get_object_id('licenses', 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
+
+
 @app.route("/nuage/api/v1_0/<obj_name>", methods=['POST'])
 def object_create(obj_name):
     data_update = json.loads(request.data)

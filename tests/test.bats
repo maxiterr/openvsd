@@ -146,6 +146,47 @@ setup() {
 }
 
 
+@test "License: create" {
+    run vsd license-create 12Z1223E23E23E23E23E23OMEX2KEOJ3EPOJ2A3EPXJP34RJC4P5IOJVPOIYJECEOP4XJPRO4JC5SRVDCOTJQXZQJ4PCJT5P
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*company *| *Compagny-1.*") -ne 0 ]
+    [ $(expr "${output}" : ".*license *| *.*") -eq 0 ]
+}
+
+
+@test "License: show" {
+    run vsd license-show 255d9673-7281-43c4-be57-fdec677f6e07
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*company *| *Compagny-1.*") -ne 0 ]
+    [ $(expr "${output}" : ".*license *| *.*") -eq 0 ]
+}
+
+
+@test "License: show with verbose" {
+    run vsd license-show 255d9673-7281-43c4-be57-fdec677f6e07 --verbose
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".* company *| *Compagny-1 .*") -ne 0 ]
+    [ $(expr "${output}" : ".* license *| *.*") -eq 0 ]
+    [ $(expr "${output}" : ".*License: .*") -ne 0 ]
+}
+
+
+@test "License: list" {
+    run vsd license-list
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".* 255d9673-7281-43c4-be57-fdec677f6e07 *| *Compagny-1 .*") -ne 0 ]
+}
+
+
+@test "License: delete" {
+    run vsd license-delete 255d9673-7281-43c4-be57-fdec677f6e07 --yes
+    [ "$status" -eq 0 ]
+    run vsd license-list
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".* 255d9673-7281-43c4-be57-fdec677f6e07 *| *Compagny-1 .*") -eq 0 ]
+}
+
+
 @test "Domain template: create" {
     run vsd domaintemplate-create DomainTemplate-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
     [ "$status" -eq 0 ]
