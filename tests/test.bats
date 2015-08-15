@@ -144,3 +144,61 @@ setup() {
     [ "$status" -eq 0 ]
     [ $(expr "${output}" : ".*name *| *nulab-update .*") -ne 0 ]
 }
+
+
+@test "Domain template: create" {
+    run vsd domaintemplate-create DomainTemplate-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*name *| *DomainTemplate-1 .*") -ne 0  ]
+    [ $(expr "${output}" : ".*ID *| *255d9673-7281-43c4-be57-fdec677f6e07.*") -ne 0  ]
+}
+
+
+@test "Domain template: list" {
+    run vsd domaintemplate-list --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*255d9673-7281-43c4-be57-fdec677f6e07 *| *DomainTemplate-1.*") -ne 0  ]
+}
+
+
+@test "Domain template: list with filter" {
+    run vsd domaintemplate-list --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --filter DomainTemplate
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*255d9673-7281-43c4-be57-fdec677f6e07 *| *DomainTemplate-1.*") -ne 0  ]
+
+    run vsd domaintemplate-list --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --filter NoDomain
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*255d9673-7281-43c4-be57-fdec677f6e07 *| *DomainTemplate-1.*") -eq 0  ]
+}
+
+
+@test "Domain template: show" {
+    run vsd domaintemplate-show 255d9673-7281-43c4-be57-fdec677f6e07
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*name *| *DomainTemplate-1 .*") -ne 0  ]
+    [ $(expr "${output}" : ".*ID *| *255d9673-7281-43c4-be57-fdec677f6e07.*") -ne 0  ]
+}
+
+
+@test "Domain template: update name" {
+    run vsd domaintemplate-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value name:domainTemplate-update
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*name *| *domainTemplate-update .*") -ne 0  ]
+}
+
+
+@test "Domain template: delete" {
+    run vsd domaintemplate-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    [ "$status" -eq 0 ]
+
+    run vsd domaintemplate-show 255d9673-7281-43c4-be57-fdec677f6e07
+    [ "$status" -eq 0 ]
+    [ $(expr "${output}" : ".*name *| *domainTemplate.*") -eq 0  ]
+}
+
+
+@test "Domain template: Create domain with show-only" {
+    run vsd --show-only ID domaintemplate-create DomainTemplate-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
+    [ "$status" -eq 0 ]
+    [ ${lines[0]} == "255d9673-7281-43c4-be57-fdec677f6e07"  ]
+}

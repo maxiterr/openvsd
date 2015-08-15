@@ -221,11 +221,13 @@ def enterprise_update(ctx, enterprise_id, key_value):
     print_object( result, only=ctx.obj['show_only'] )
 
 @vsdcli.command(name='domaintemplate-list')
-@click.argument('enterprise-id', metavar='<enterprise ID>', required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
+@click.option('--filter', metavar='<filter>',
+              help='Filter for NEED TO BE UPDATED')
 @click.pass_context
-def domaintemplate_list(ctx, enterprise_id):
+def domaintemplate_list(ctx, enterprise_id, filter):
     """Show all domaintemplate for a given enterprise id"""
-    result = ctx.obj['nc'].get("enterprises/%s/domaintemplates" %enterprise_id)
+    result = ctx.obj['nc'].get("enterprises/%s/domaintemplates" %enterprise_id, filter=filter)
     table=PrettyTable(["Domain Template ID", "Name"])
     for line in result:
         table.add_row( [ line['ID'],
