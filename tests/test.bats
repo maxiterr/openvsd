@@ -335,3 +335,73 @@ setup() {
     assert_line_contains 0 255d9673-7281-43c4-be57-fdec677f6e07
     vsd domain-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value routeTarget:65000 --key-value routeDistinguisher:100
 }
+
+
+@test "Zone: create without missing element" {
+    run vsd zone-create Zone-1
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--domain-id\"."
+
+    run vsd zone-create --domain-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing argument \"name\"."
+}
+
+
+@test "Zone: create" {
+    run vsd zone-create Zone-1 --domain-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table name Zone-1
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Zone: update" {
+    skip "Update command doesn't exist yet"
+    run vsd zone-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value name:Zone-update
+    assert_success
+    assert_output_contains_in_table name Zone-update
+}
+
+
+@test "Zone: list for a given domain" {
+    run vsd zone-list --domain-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table Zone-1 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Zone: list with filter" {
+    run vsd zone-list --domain-id 255d9673-7281-43c4-be57-fdec677f6e07 --filter Zone
+    assert_success
+    assert_output_contains 255d9673-7281-43c4-be57-fdec677f6e07
+
+    run vsd zone-list --domain-id 255d9673-7281-43c4-be57-fdec677f6e07 --filter noZone
+    assert_success
+    assert_output_not_contains 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Zone: show" {
+    run vsd zone-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table name Zone-1
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Zone: delete" {
+    run vsd zone-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+
+    run vsd zone-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_not_contains 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Zone: create with show-only" {
+    run vsd --show-only ID zone-create Zone-1 --domain-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_line_equals 0 255d9673-7281-43c4-be57-fdec677f6e07
+}
