@@ -235,8 +235,8 @@ setup() {
     assert_success
     assert_output_empty
     run vsd domaintemplate-show 255d9673-7281-43c4-be57-fdec677f6e07
-    assert_success
-    assert_output_not_contains domainTemplate
+    assert_fail
+    assert_line_equals 0 "Error: Cannot find object with ID"
 }
 
 
@@ -247,24 +247,18 @@ setup() {
 }
 
 
-@test "Domain: create without enterprise" {
+@test "Domain: create without missing element" {
     run vsd domain-create Domain-1 --template-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_output_contains "Error: Missing option \"--enterprise-id\"."
-}
+    assert_line_equals -1 "Error: Missing option \"--enterprise-id\"."
 
-
-@test "Domain: create without template" {
     run vsd domain-create Domain-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
     assert_fail
-    assert_output_contains "Error: Missing option \"--template-id\""
-}
+    assert_line_equals -1 "Error: Missing option \"--template-id\"."
 
-
-@test "Domain: create without name" {
     run vsd domain-create --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --template-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_output_contains "Error: Missing argument \"name\""
+    assert_line_equals -1 "Error: Missing argument \"name\"."
 }
 
 
@@ -279,6 +273,25 @@ setup() {
 @test "Domain: update" {
     run vsd domain-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value routeTarget:65000 --key-value routeDistinguisher:100
     assert_success
+    assert_output_contains_in_table routeTarget 65000
+    assert_output_contains_in_table routeDistinguisher 100
+}
+
+
+@test "Domain: delete" {
+    run vsd domain-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+
+    run vsd domain-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals 0 "Error: Cannot find object with ID"
+}
+
+
+@test "Domain: create with rt/rd" {
+    run vsd domain-create Domain-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --template-id 255d9673-7281-43c4-be57-fdec677f6e07 --rt 65000 --rd 100
+    assert_success
+    assert_output_contains_in_table name Domain-1
     assert_output_contains_in_table routeTarget 65000
     assert_output_contains_in_table routeDistinguisher 100
 }
@@ -318,18 +331,8 @@ setup() {
 }
 
 
-@test "Domain: delete" {
-    run vsd domain-delete 255d9673-7281-43c4-be57-fdec677f6e07
-    assert_success
-    assert_output_empty
-
-    run vsd domain-show 255d9673-7281-43c4-be57-fdec677f6e07
-    assert_success
-    assert_output_not_contains_in_table name domainTemplate
-}
-
-
-@test "Domain: Create domain with show-only" {
+@test "Domain: create with show-only" {
+    vsd domain-delete 255d9673-7281-43c4-be57-fdec677f6e07
     run vsd --show-only ID domain-create Domain-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --template-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_success
     assert_line_contains 0 255d9673-7281-43c4-be57-fdec677f6e07
@@ -395,8 +398,8 @@ setup() {
     assert_success
 
     run vsd zone-show 255d9673-7281-43c4-be57-fdec677f6e07
-    assert_success
-    assert_output_not_contains 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals 0 "Error: Cannot find object with ID"
 }
 
 
@@ -439,10 +442,10 @@ setup() {
     assert_success
     assert_output_contains_in_table netmask 255.255.255.0
     assert_output_contains_in_table gateway 192.168.0.1
+
     # Make this subnet valid because mock doesn't create those values
     vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value routeTarget:65000
     vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value routeDistinguisher:100
-    vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value address:192.168.0.0
     vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value externalID:255d9673-7281-43c4-be57-fdec677f6e07
 }
 
@@ -485,8 +488,8 @@ setup() {
     assert_success
 
     run vsd subnet-show 255d9673-7281-43c4-be57-fdec677f6e07
-    assert_success
-    assert_output_not_contains 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals 0 "Error: Cannot find object with ID"
 }
 
 
@@ -497,6 +500,5 @@ setup() {
     # Make this subnet valid because mock doesn't create those values
     vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value routeTarget:65000
     vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value routeDistinguisher:100
-    vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value address:192.168.0.0
     vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value externalID:255d9673-7281-43c4-be57-fdec677f6e07
 }
