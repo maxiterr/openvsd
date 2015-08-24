@@ -343,7 +343,7 @@ def domain_update(ctx, domain_id, key_value):
 
 
 @vsdcli.command(name='zone-list')
-@click.argument('domain-id', metavar='<domain ID>', required=True)
+@click.option('--domain-id', metavar='<domain ID>', required=True)
 @click.option('--filter', metavar='<filter>',
               help='Filter for address, netmask, IPType, name, description, numberOfHostsInSubnets, publicZone, address, netmask, IPType, name, address, netmask, IPType, name, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
