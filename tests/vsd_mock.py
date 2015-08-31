@@ -112,6 +112,10 @@ def object_list(obj_name):
 
 @app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['GET'])
 def object_show(obj_name, obj_id):
+    data_src = get_object_id(obj_name, 'ID', obj_id)
+    if data_src == {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'not found')['message']), '404')
     return json.dumps([get_object_id(obj_name, 'ID', obj_id)])
 
 
@@ -175,12 +179,13 @@ def object_create_with_parent(parent_name, parent_id, obj_name):
     if data_src != {}:
         return make_response(json.dumps(
             get_object_id('messages', 'name', 'already exists')['message']), '409')
-    new = {'name': data_update['name'],
-           'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
-           'description': 'None'}
+    data_update.update({
+        'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
+        'description': 'None'
+    })
     if obj_name not in database:
         database.update({obj_name:[]})
-    database[obj_name].append(new)
+    database[obj_name].append(data_update)
     return json.dumps([get_object_id(obj_name, 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
 
 
