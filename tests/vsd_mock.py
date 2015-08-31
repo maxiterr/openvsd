@@ -174,11 +174,11 @@ def object_create_with_parent(parent_name, parent_id, obj_name):
     if data_src == {}:
         return make_response(json.dumps(
             get_object_id('messages', 'name', 'not found')['message']), '404')
-
-    data_src = get_object_id(obj_name, 'name', data_update['name'])
-    if data_src != {}:
-        return make_response(json.dumps(
-            get_object_id('messages', 'name', 'already exists')['message']), '409')
+    if 'name' in data_update.keys():
+        data_src = get_object_id(obj_name, 'name', data_update['name'])
+        if data_src != {}:
+            return make_response(json.dumps(
+                get_object_id('messages', 'name', 'already exists')['message']), '409')
     data_update.update({
         'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
         'description': 'None'
