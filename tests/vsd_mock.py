@@ -179,14 +179,19 @@ def object_create_with_parent(parent_name, parent_id, obj_name):
         if data_src != {}:
             return make_response(json.dumps(
                 get_object_id('messages', 'name', 'already exists')['message']), '409')
+    uuid = '255d9673-7281-43c4-be57-fdec677f6e07'
+    with_random_uuid = ['dhcpoptions']
+    if obj_name in with_random_uuid:
+        import uuid
+        uuid = str(uuid.uuid4())
     data_update.update({
-        'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
+        'ID': uuid,
         'description': 'None'
     })
     if obj_name not in database:
         database.update({obj_name:[]})
     database[obj_name].append(data_update)
-    return json.dumps([get_object_id(obj_name, 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
+    return json.dumps([get_object_id(obj_name, 'ID', uuid)])
 
 
 @app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['PUT'])
