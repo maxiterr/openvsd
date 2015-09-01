@@ -22,7 +22,7 @@ class VSDConnection(object):
         import requests
         requests.packages.urllib3.disable_warnings()
         try:
-            data = json.dumps(params) if params else None
+            data = json.dumps(params) if params is not None else None
             if self.debug:
                 print '#####################################################'
                 print '# Request'
