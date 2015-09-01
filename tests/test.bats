@@ -502,3 +502,63 @@ setup() {
     vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value routeDistinguisher:100
     vsd subnet-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value externalID:255d9673-7281-43c4-be57-fdec677f6e07
 }
+
+
+@test "User: create with missing element" {
+    run vsd user-create --firstname john --lastname doe --email john.doe@nomail.com --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing argument \"username\"."
+
+    run vsd user-create jdoe --firstname john --email john.doe@nomail.com --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--lastname\"."
+
+    run vsd user-create jdoe --lastname doe --email john.doe@nomail.com --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--firstname\"."
+
+    run vsd user-create jdoe --lastname doe --firstname john --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--email\"."
+
+    run vsd user-create jdoe --lastname doe --firstname john --email john.doe@nomail.com --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--password\"."
+
+    run vsd user-create jdoe --lastname doe --firstname john --email john.doe@nomail.com --password xDz3R
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--enterprise-id\"."
+}
+
+@test "User: create" {
+    run vsd user-create jdoe --firstname john --lastname doe --email john.doe@nomail.com --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table userName jdoe
+    assert_output_contains_in_table email john.doe@nomail.com
+    assert_output_contains_in_table firstName john
+    assert_output_contains_in_table lastName doe
+}
+
+@test "User: show" {
+    run vsd user-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table userName jdoe
+    assert_output_contains_in_table email john.doe@nomail.com
+    assert_output_contains_in_table firstName john
+    assert_output_contains_in_table lastName doe
+}
+
+@test "User: delete" {
+    run vsd user-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_empty
+    run vsd user-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_contains 0 "Error: Cannot find object with ID"
+}
+
+@test "User: create with --show-only" {
+    run vsd --show-only ID user-create jdoe --firstname john --lastname doe --email john.doe@nomail.com --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_line_equals 0 255d9673-7281-43c4-be57-fdec677f6e07
+}
