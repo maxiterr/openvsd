@@ -623,7 +623,7 @@ def group_delete(ctx, group_id):
 
 @vsdcli.command(name='group-add-user')
 @click.argument('group-id', metavar='<group ID>', required=True)
-@click.option('--user-id', metavar='<user ID>')
+@click.option('--user-id', metavar='<user ID>', required=True)
 @click.pass_context
 def group_add_user(ctx, group_id, user_id):
     """Add a user to a given group"""
@@ -635,7 +635,7 @@ def group_add_user(ctx, group_id, user_id):
 
 @vsdcli.command(name='group-del-user')
 @click.argument('group-id', metavar='<group ID>', required=True)
-@click.option('--user-id', metavar='<user ID>')
+@click.option('--user-id', metavar='<user ID>', required=True)
 @click.pass_context
 def group_del_user(ctx, group_id, user_id):
     """delete a user from a given group"""
