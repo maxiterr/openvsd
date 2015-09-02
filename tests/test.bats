@@ -611,3 +611,35 @@ setup() {
     # ToDo (pierrepadrixe): description not working1
     #assert_output_contains_in_table description "Test Group"
 }
+
+@test "Group: add user in group with missing elements" {
+    run vsd group-add-user --user-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing argument \"group-id\"."
+
+    run vsd group-add-user 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--user-id\"."
+}
+
+@test "Group: add user in group" {
+    run vsd group-add-user 255d9673-7281-43c4-be57-fdec677f6e07 --user-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_empty
+}
+
+@test "Group: delete user in group with missing elements" {
+    run vsd group-del-user --user-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing argument \"group-id\"."
+
+    run vsd group-del-user 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--user-id\"."
+}
+
+@test "Group: delete user in group" {
+    run vsd group-del-user 255d9673-7281-43c4-be57-fdec677f6e07 --user-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_empty
+}
