@@ -614,6 +614,13 @@ def group_update(ctx, group_id, key_value):
     result = ctx.obj['nc'].get("groups/%s" %group_id)[0]
     print_object( result, only=ctx.obj['show_only'] )
 
+@vsdcli.command(name='group-delete')
+@click.argument('group-id', metavar='<group ID>', required=True)
+@click.pass_context
+def group_delete(ctx, group_id):
+    """Delete a given group"""
+    ctx.obj['nc'].delete("groups/%s" %group_id)
+
 @vsdcli.command(name='group-add-user')
 @click.argument('group-id', metavar='<group ID>', required=True)
 @click.option('--user-id', metavar='<user ID>')
