@@ -562,3 +562,52 @@ setup() {
     assert_success
     assert_line_equals 0 255d9673-7281-43c4-be57-fdec677f6e07
 }
+
+@test "Group: create with missing elements" {
+    run vsd group-create --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing argument \"name\"."
+
+    run vsd group-create group-1
+    assert_fail
+    assert_line_equals -1 "Error: Missing option \"--enterprise-id\"."
+}
+
+@test "Group: create" {
+    run vsd group-create group-1 --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07 --description "Test Group"
+    assert_success
+    assert_output_contains_in_table name group-1
+    # ToDo (pierrepadrixe): description not working
+    #assert_output_contains_in_table description "Test Group"
+}
+
+@test "Group: show" {
+    run vsd group-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table name group-1
+    # ToDo (pierrepadrixe): description not working
+    #assert_output_contains_in_table description "Test Group"
+}
+
+@test "Group: update" {
+    run vsd group-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value "description:Test Group"
+    assert_success
+    assert_output_contains_in_table description "Test Group"
+}
+
+@test "Group: delete" {
+    #skip "Group-delete command doesn't exist yet"
+    run vsd group-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    run vsd group-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_contains 0 "Error: Cannot find object with ID"
+}
+
+@test "Group: create with --show-only" {
+    run vsd group-create group-1 --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07 --description "Test Group"
+    assert_success
+    assert_output_contains_in_table name group-1
+    # ToDo (pierrepadrixe): description not working1
+    #assert_output_contains_in_table description "Test Group"
+}
