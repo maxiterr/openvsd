@@ -120,7 +120,7 @@ def object_show(obj_name, obj_id):
 
 
 @app.route("/nuage/api/v1_0/<parent_name>/<parent_id>/<obj_name>", methods=['GET'])
-def object_list_with_parent(parent_name, parent_id, obj_name):
+def get_object_list_with_parent(parent_name, parent_id, obj_name):
     # Check parent exist but don't check parent own objects
     data_src = get_object_id(parent_name, 'ID', parent_id)
     if data_src == {}:
@@ -128,6 +128,20 @@ def object_list_with_parent(parent_name, parent_id, obj_name):
             get_object_id('messages', 'name', 'not found')['message']), '404')
     filter = request.headers.get('X-Nuage-Filter')
     return json.dumps(filter_objets(obj_name, filter))
+
+
+@app.route("/nuage/api/v1_0/groups/<obj_id>/users", methods=['PUT'])
+def update_group_user_list(obj_id):
+    # ToDo: Currently the server_mock doesn't do anything while we update
+    #       the list of users in the group. If you wan to implement this
+    #       mock method, you should at first fix the user-list mock: it
+    #       currently doesn't list user by group-id (mock of "vsd user-list
+    #       --group-id xD42x" currently doesn't work)
+    #
+    #       What we planned to do for a short term solution:
+    #       don't use mock server to test it and just add more checks on
+    #       the type of the parameters in the tests.
+    return '{}'
 
 
 @app.route("/nuage/api/v1_0/licenses", methods=['POST'])

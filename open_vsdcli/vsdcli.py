@@ -614,9 +614,16 @@ def group_update(ctx, group_id, key_value):
     result = ctx.obj['nc'].get("groups/%s" %group_id)[0]
     print_object( result, only=ctx.obj['show_only'] )
 
+@vsdcli.command(name='group-delete')
+@click.argument('group-id', metavar='<group ID>', required=True)
+@click.pass_context
+def group_delete(ctx, group_id):
+    """Delete a given group"""
+    ctx.obj['nc'].delete("groups/%s" %group_id)
+
 @vsdcli.command(name='group-add-user')
 @click.argument('group-id', metavar='<group ID>', required=True)
-@click.option('--user-id', metavar='<user ID>')
+@click.option('--user-id', metavar='<user ID>', required=True)
 @click.pass_context
 def group_add_user(ctx, group_id, user_id):
     """Add a user to a given group"""
@@ -628,23 +635,17 @@ def group_add_user(ctx, group_id, user_id):
 
 @vsdcli.command(name='group-del-user')
 @click.argument('group-id', metavar='<group ID>', required=True)
-@click.option('--user-id', metavar='<user ID>')
+@click.option('--user-id', metavar='<user ID>', required=True)
 @click.pass_context
-def group_add_user(ctx, group_id, user_id):
+def group_del_user(ctx, group_id, user_id):
     """delete a user from a given group"""
     # Get all user for this group
-    userList = ctx.obj['nc'].get("groups/%s/users" %group_id )
-    userPresent = 0
-    user_ids = []
-    for user in userList:
-        if user['ID'] != user_id:
-            user_ids.append( user['ID'] )
-        else:
-            userPresent = 1
-    if userPresent != 0:
-        ctx.obj['nc'].put("groups/%s/users" %group_id, user_ids )
-    else:
+    user_list = ctx.obj['nc'].get("groups/%s/users" % group_id)
+    user_ids = [elt.get('ID') for elt in user_list if elt.get('ID') != user_id]
+    if len(user_ids) == len(user_list):
         print "User not present in the group"
+    else:
+        ctx.obj['nc'].put("groups/%s/users" % group_id, user_ids)
 
 @vsdcli.command(name='gateway-list')
 @click.option('--enterprise-id', metavar='<ID>')
