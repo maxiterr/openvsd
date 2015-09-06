@@ -58,10 +58,27 @@ class VSDConnection(object):
         return resp.json()
 
     def get(self, url, filter=None):
+        def _next_page_is_invalid(headers):
+            if ('X-Nuage-PageSize' not in headers or
+                'X-Nuage-Page' not in r.headers or
+                'X-Nuage-Count' not in r.headers):
+                return True
+            if (int(r.headers['X-Nuage-PageSize']) * (1+int(r.headers['X-Nuage-Page']))
+                >= int(r.headers['X-Nuage-Count'])):
+                return True
+            return False
+
         self.authenticate()
         if filter: self.headers['X-Nuage-Filter'] = filter
-        r = self._do_request('GET', self.base_url + url, headers=self.headers)
-        return self._response(r)
+        resp = []
+        self.headers['X-Nuage-Page'] = 0
+        while True:
+            r = self._do_request('GET', self.base_url + url, headers=self.headers)
+            resp += self._response(r)
+            self.headers['X-Nuage-Page'] += 1
+            if _next_page_is_invalid(r.headers):
+               break
+        return resp
 
     def post(self, url, params):
         self.authenticate()
