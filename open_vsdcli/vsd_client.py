@@ -111,14 +111,13 @@ class VSDConnection(object):
             with open(APIKey_file) as data_file:
                 api_session = json.load(data_file)
             # replay auth if expire
-            if int(api_session['APIKeyExpiry'])/1000 < time.time():
+            if int(api_session['APIKeyExpiry'])/1000 < int(time.time()):
                 do_auth = True
             # replay auth every 5 min
-            if int(api_session['APIKeyCreation']) + 300 < time.time():
+            if int(api_session['APIKeyCreation']) + 300 < int(time.time()):
                 do_auth = True
         else:
             do_auth = True
-
         if do_auth:
             r = self._do_request('GET', self.base_url + "me", headers=self.headers)
             rjson = self._response(r)[0]
