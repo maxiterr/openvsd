@@ -1199,6 +1199,21 @@ def port_show(ctx, port_id):
     print_object(result, only=ctx.obj['show_only'])
 
 
+@vsdcli.command(name='port-update')
+@click.argument('port-id', metavar='<port ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def port_update(ctx, port_id, key_value):
+    """Update key/value for a given port"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("ports/%s" %port_id, params)
+    result = ctx.obj['nc'].get("ports/%s" %port_id)[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+
 def main():
     vsdcli(obj={})
 
