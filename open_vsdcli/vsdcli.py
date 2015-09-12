@@ -1108,6 +1108,112 @@ def add_permission(ctx, entity_id, action, **ids):
     params['permittedAction'] = action
     ctx.obj['nc'].post("%ss/%s/permissions" %(id_type, id), params)
 
+
+@vsdcli.command(name='enterprisepermission-list')
+@click.option('--redundancygroup-id', metavar='<id>')
+@click.option('--gateway-id', metavar='<id>')
+@click.option('--vlan-id', metavar='<id>')
+@click.option('--service-id', metavar='<id>')
+@click.option('--port-id', metavar='<id>')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def enterprisepermission_list(ctx, filter, **ids):
+    """List all Enterprise Permission for a CSP entity"""
+    id_type, id = check_id(**ids)
+    request = "%ss/%s/enterprisepermissions" %(id_type, id)
+    if filter == None :
+        result = ctx.obj['nc'].get(request)
+    else :
+        result = ctx.obj['nc'].get(request, filter=filter)
+    table=PrettyTable(["ID", "Action", "Entity ID", "Entity type", "Entity name"])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['permittedAction'],
+                       line['permittedEntityID'],
+                       line['permittedEntityType'],
+                       line['permittedEntityName'] ])
+    print table
+
+
+@vsdcli.command(name='enterprisepermission-show')
+@click.argument('enterprisepermission-id', metavar='<enterprisepermission-id>', required=True)
+@click.pass_context
+def enterprisepermission_show(ctx, permission_id):
+    """Show information for a given enterprisepermission id"""
+    result = ctx.obj['nc'].get("enterprisepermissions/%s" %enterprisepermission_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='enterprisepermission-create')
+@click.argument('entity-id', metavar='<group or user ID>', required=True)
+@click.option('--action', type=click.Choice(['USE',
+                                             'EXTEND',
+                                             'READ',
+                                             'INSTANTIATE']),
+              default='USE', help='Default : USE')
+@click.option('--redundancygroup-id', metavar='<id>')
+@click.option('--gateway-id', metavar='<id>')
+@click.option('--vlan-id', metavar='<id>')
+@click.option('--service-id', metavar='<id>')
+@click.option('--port-id', metavar='<id>')
+@click.pass_context
+def enterprisepermission_create(ctx, entity_id, action, **ids):
+    """Add permission for a given element (gateway, vlan, etc...)"""
+    id_type, id = check_id(**ids)
+    params = {}
+    params['permittedEntityID'] = entity_id
+    params['permittedAction'] = action
+    ctx.obj['nc'].post("%ss/%s/enterprisepermissions" %(id_type, id), params)
+
+
+@vsdcli.command(name='port-list')
+@click.option('--redundancygroup-id', metavar='<id>')
+@click.option('--gateway-id', metavar='<id>')
+@click.option('--autodiscoveredgateway-id', metavar='<id>')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name, physicalName, portType, userMnemonic, useUserMnemonic, name, description, physicalName, portType, VLANRange, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def port_list(ctx, filter, **ids):
+    """List all port for a given redundancygroup, gateway or autodiscoveredgateway"""
+    id_type, id = check_id(**ids)
+    request = "%ss/%s/ports" %(id_type, id)
+    if filter == None :
+        result = ctx.obj['nc'].get(request)
+    else :
+        result = ctx.obj['nc'].get(request, filter=filter)
+    table=PrettyTable(["ID", "name", "physicalName"])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['name'],
+                       line['physicalName'] ])
+    print table
+
+
+@vsdcli.command(name='port-show')
+@click.argument('port-id', metavar='<port-id>', required=True)
+@click.pass_context
+def port_show(ctx, port_id):
+    """Show information for a given port id"""
+    result = ctx.obj['nc'].get("ports/%s" % port_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='port-update')
+@click.argument('port-id', metavar='<port ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def port_update(ctx, port_id, key_value):
+    """Update key/value for a given port"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("ports/%s" %port_id, params)
+    result = ctx.obj['nc'].get("ports/%s" %port_id)[0]
+    print_object( result, only=ctx.obj['show_only'] )
+
+
 def main():
     vsdcli(obj={})
 
