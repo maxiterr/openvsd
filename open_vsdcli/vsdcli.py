@@ -1339,6 +1339,21 @@ def egressacltemplate_delete(ctx, egressacltemplate_id):
     ctx.obj['nc'].delete("egressacltemplates/%s?responseChoice=1" % egressacltemplate_id)
 
 
+@vsdcli.command(name='egressacltemplate-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--domain-id', metavar='<id>')
+@click.option('--l2domain-id', metavar='<id>')
+@click.option('--domaintemplate-id', metavar='<id>')
+@click.option('--l2domaintemplate-id', metavar='<id>')
+@click.pass_context
+def egressacltemplate_create(ctx, name, **ids):
+    """Add an Egress ACL template to a given domain, l2domain, domaintemplate or l2domaintemplate"""
+    id_type, id = check_id(**ids)
+    params = {'name' : name}
+    result = ctx.obj['nc'].post("%ss/%s/egressacltemplates" % (id_type, id), params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
 @vsdcli.command(name='ingressacltemplate-list')
 @click.option('--l2domaintemplate-id', metavar='<id>')
 @click.option('--domaintemplate-id', metavar='<id>')
@@ -1395,9 +1410,23 @@ def ingressacltemplate_delete(ctx, ingressacltemplate_id):
     ctx.obj['nc'].delete("ingressacltemplates/%s?responseChoice=1" % ingressacltemplate_id)
 
 
+@vsdcli.command(name='ingressacltemplate-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--domain-id', metavar='<id>')
+@click.option('--l2domain-id', metavar='<id>')
+@click.option('--domaintemplate-id', metavar='<id>')
+@click.option('--l2domaintemplate-id', metavar='<id>')
+@click.pass_context
+def ingressacltemplate_create(ctx, name, **ids):
+    """Add an Ingress ACL template to a given domain, l2domain, domaintemplate or l2domaintemplate"""
+    id_type, id = check_id(**ids)
+    params = {'name' : name}
+    result = ctx.obj['nc'].post("%ss/%s/ingressacltemplates" % (id_type, id), params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
 def main():
     vsdcli(obj={})
 
 if __name__ == '__main__':
     main()
-
