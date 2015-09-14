@@ -1214,6 +1214,75 @@ def port_update(ctx, port_id, key_value):
     print_object( result, only=ctx.obj['show_only'] )
 
 
+@vsdcli.command(name='vlan-list')
+@click.option('--port-id', metavar='<id>')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for value, userMnemonic, useUserMnemonic, description, lastUpdatedDate, creationDate, externalID')
+@click.pass_context
+def vlan_list(ctx, filter, port_id):
+    """List all port for a given port"""
+    result = ctx.obj['nc'].get("ports/%s/vlans" % port_id, filter=filter)
+    table=PrettyTable(["ID", "name", "value", "userMnemonic"])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['description'],
+                       line['value'],
+                       line['userMnemonic']])
+    print table
+
+
+@vsdcli.command(name='vlan-show')
+@click.argument('vlan-id', metavar='<vlan-id>', required=True)
+@click.pass_context
+def vlan_show(ctx, vlan_id):
+    """Show information for a given vlan id"""
+    result = ctx.obj['nc'].get("vlans/%s" % vlan_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='vlan-create')
+@click.option('--port-id', metavar='<id>', required=True)
+@click.option('--vlan', metavar='<vlan number>', required=True)
+@click.option('--mnemonic', metavar='<user Mnemonic>')
+@click.option('--description', metavar='<description>')
+@click.pass_context
+def vlan_create(ctx, port_id, vlan, mnemonic, description):
+    """Add vlan for a given port"""
+    params = {}
+    if mnemonic is not None:
+        params['userMnemonic'] = mnemonic
+        params['useUserMnemonic'] = True
+    if description is not None:
+        params['description'] = description
+    #TODO: Check vlan is able to be converted.
+    params['value'] = int(vlan)
+    result = ctx.obj['nc'].post("ports/%s/vlans" % port_id, params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='vlan-update')
+@click.argument('vlan-id', metavar='<vlan ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def vlan_update(ctx, vlan_id, key_value):
+    """Update key/value for a given vlan"""
+    params = {}
+    for kv in key_value:
+        #TODO : check key_value is "str:str" in order to be parsable
+        key, value = kv.split(':',1)
+        params[key] = value
+    ctx.obj['nc'].put("vlans/%s" %vlan_id, params)
+    result = ctx.obj['nc'].get("vlans/%s" % vlan_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='vlan-delete')
+@click.argument('vlan-id', metavar='<vlan ID>', required=True)
+@click.pass_context
+def vlan_delete(ctx, vlan_id):
+    """Delete a given vlan"""
+    ctx.obj['nc'].delete("vlans/%s" %vlan_id)
+
 def main():
     vsdcli(obj={})
 
