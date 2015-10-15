@@ -1,11 +1,12 @@
-Clone repo on local
+OpenVSD - Nuage (SDN) VSD CLI
+=============================
 
-cp vsd-creds.example vsd-creds
+OpenVSD is the open source CLI for Nuage, a Software Defined Networking solution.
 
-Edit vsd-creds with your own creds
+Note that The CLI implements the version 2.x of the Nuage VSD API methods.
 
-source vsd-creds
 
-Enjoy !
+For information about the API, read the documentation hosted on your VSD:
 
-API documentation can be found on : https://<VSD hostname>:<VSD Port>/web/docs/api/V1_0/API.html
+    https://vsd_hostname:vsd_port/web/docs/api/V1_0/API.html
+
