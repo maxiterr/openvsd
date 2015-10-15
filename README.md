@@ -1,6 +1,8 @@
 OpenVSD - Nuage (SDN) VSD CLI
 =============================
 
+[![Build Status](https://travis-ci.org/Numergy/openvsd.svg?branch=master)](https://travis-ci.org/Numergy/openvsd)
+
 OpenVSD is the open source CLI for Nuage, a Software Defined Networking solution.
 
 Note that The CLI implements the version 2.x of the Nuage VSD API methods.
