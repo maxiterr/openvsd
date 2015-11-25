@@ -20,7 +20,10 @@ import base64
 
 class VSDConnection(object):
     def __init__(self, username, password, enterprise, base_url, debug=False, force_auth=False):
-        self.base_url = base_url
+        if base_url.endswith('/'):
+            self.base_url = base_url
+        else:
+            self.base_url = "%s/" % base_url
         self.username = username
         self.headers = {
             'Authorization' : "XREST %s" %
