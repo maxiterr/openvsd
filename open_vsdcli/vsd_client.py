@@ -19,7 +19,7 @@ import base64
 
 
 class VSDConnection(object):
-    def __init__(self, username, password, enterprise, base_url, debug=False, force_auth=False):
+    def __init__(self, username, password, organization, base_url, debug=False, force_auth=False):
         if base_url.endswith('/'):
             self.base_url = base_url
         else:
@@ -29,7 +29,7 @@ class VSDConnection(object):
             'Authorization' : "XREST %s" %
                               base64.urlsafe_b64encode('%s:%s' %(username, password)),
             'Content-Type' : "application/json",
-            'X-Nuage-Organization' : enterprise
+            'X-Nuage-Organization' : organization
         }
         self.debug = debug
         self.force_auth = force_auth
