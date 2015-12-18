@@ -41,12 +41,15 @@ class VSDConnection(object):
         try:
             data = json.dumps(params) if params is not None else None
             if self.debug:
+                print_headers = "# Headers:"
+                for line in json.dumps(headers, indent=4).split('\n'):
+                    print_headers += '\n#    %s' % line
                 print '#####################################################'
                 print '# Request'
                 print '# Method: %s' % method
                 print '# URL: %s' % url
-                print '# Headers: %s' % json.dumps(headers)
-                print '# Parameters: %s' % data
+                print print_headers
+                print "# Parameters: %s" % data
                 print '#####################################################'
             response = requests.request(method, url, headers=headers, verify=False, timeout=10, data=data)
         except requests.exceptions.RequestException as error:
@@ -54,9 +57,12 @@ class VSDConnection(object):
             print 'Detail: %s' % error
             raise SystemExit(1)
         if self.debug:
+            print_headers = "# Headers:"
+            for line in json.dumps(dict(response.headers), indent=4).split('\n'):
+                print_headers += '\n#    %s' % line
             print '# Response'
             print '# Status code: %s' % response
-            print '# Headers: %s' % response.headers
+            print print_headers
             print '# Body: %s' % response.text
             print '#####################################################'
             print ''
