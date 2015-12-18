@@ -95,19 +95,19 @@ def check_id(**ids):
               help='VSD Authentication username (Env: VSD_USERNAME)', required=True )
 @click.option('--vsd-password',metavar='<password>', envvar='VSD_PASSWORD',
               help='VSD Authentication password (Env: VSD_PASSWORD)', required=True )
-@click.option('--vsd-enterprise',metavar='<enterprise>', envvar='VSD_ENTERPRISE',
-              help='VSD Authentication enterprise (Env: VSD_ENTERPRISE)', required=True )
+@click.option('--vsd-organization',metavar='<organization>', envvar='VSD_ORGANIZATION',
+              help='VSD Authentication organization (Env: VSD_ORGANIZATION)', required=True )
 @click.option('--show-only',metavar='<key>',
               help='Show only the value for a given key (usable for show and create command)' )
 @click.option('--debug', is_flag=True, help='Active debug for request and response')
 @click.option('--force-auth', is_flag=True, help='Do not use existing APIkey. Replay authentication')
 @click.pass_context
-def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise, vsd_url, show_only, debug, force_auth):
+def vsdcli(ctx, vsd_username, vsd_password, vsd_organization, vsd_url, show_only, debug, force_auth):
     """Command-line interface to the VSD APIs"""
     nc = VSDConnection(
             vsd_username,
             vsd_password,
-            vsd_enterprise,
+            vsd_organization,
             vsd_url,
             debug=debug,
             force_auth=force_auth
