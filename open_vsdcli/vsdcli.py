@@ -1185,11 +1185,12 @@ def port_list(ctx, filter, **ids):
         result = ctx.obj['nc'].get(request)
     else :
         result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "name", "physicalName"])
+    table=PrettyTable(["ID", "name", "physicalName", "Type"])
     for line in result:
         table.add_row([line['ID'],
                        line['name'],
-                       line['physicalName'] ])
+                       line['physicalName'],
+                       line['portType'] ])
     print table
 
 
