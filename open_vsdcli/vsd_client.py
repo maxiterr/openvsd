@@ -74,8 +74,12 @@ class VSDConnection(object):
             print 'Error: Athentication failed. Please verify your credentials.'
             raise SystemExit(1)
         if resp.status_code < 200 or resp.status_code >= 300:
-            print 'Error: %s' % resp.json()['errors'][0]['descriptions'][0]['description']
-            raise SystemExit(1)
+            try:
+                print 'Error: %s' % resp.json()['errors'][0]['descriptions'][0]['description']
+                raise SystemExit(1)
+            except ValueError:
+                print 'Unknown Error: VSD returns\n%s' % resp.text
+                raise SystemExit(1)
         if resp.text == '':
             return []
         return resp.json()

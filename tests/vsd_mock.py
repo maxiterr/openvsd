@@ -119,6 +119,16 @@ def me_show():
               'enterpriseID': 'fc3a351e-87dc-46a4-bcf5-8c4bb204bd46'}]
     return json.dumps(reply)
 
+@app.route("/nuage/api/v1_0/enterprises/bad-object", methods=['GET'])
+def bag_object():
+    msg = ("<html><head><title>JBoss Web/7.0.17.Final - Error report</title>"
+           " </head><body><h1>HTTP Status 400 - </h1><HR size=\"1\" noshade=\"noshade\">"
+           "<p><b>type</b> Status report</p><p><b>message</b> <u></u></p><p><b>"
+           "description</b> <u>The request sent by the client was syntactically incorrect ()."
+           "</u></p><HR size=\"1\" noshade=\"noshade\"><h3>JBoss Web/7.0.17.Final</h3>"
+           "</body></html>")
+    make_response(msg, '405')
+
 
 @app.route("/nuage/api/v1_0/<obj_name>", methods=['GET'])
 def object_list(obj_name):

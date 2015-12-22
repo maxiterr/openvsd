@@ -47,6 +47,13 @@ setup() {
 }
 
 
+@test "VSD client: request bag object" {
+    run vsd enterprise-show bad-object
+    assert_fail
+    assert_line_contains 0 "Unknown Error: VSD returns"
+}
+
+
 @test "VSD client: run with debug option" {
     run vsd --debug me-show
     assert_success
