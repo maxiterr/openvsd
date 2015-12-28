@@ -1,6 +1,7 @@
 language: python
+
 python:
-  - "2.7"
+  - '2.7'
 
 before_install:
   - wget https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz
@@ -20,3 +21,11 @@ script:
   - tests/run_tests.sh
 
 sudo: false
+
+deploy:
+  provider: pypi
+  user: maxiterr
+  password:
+    secure: cqT15mjK9/PPjb7xbL7UK6FWPhzkb/h43aj1K5T3n3WnbCF7l2kVhRyOLroVCY+n1foqB8x+npJk6HoVTNIJk9M4/TEfCZYImAWCy/82zjCLz6BhEVznwToP5XzTI8z4z2+1GWxNbe8MPG0CC0cxaTBprZnReH8rdzSkTyxGZh5hY0Lam7nVS0Q96sMu/B/qzlvnKqzG8+eu1lZu9+XAm3yw9NFp2pjPStDqX3ZGtD/nAT0M0vL5Tg7NvXLCcRjhLp6PsZiEc8tYK4Z2CpNDGEGM7dPUv0ZiSq93VpfcRhThm9TU4s2hvs6F/D9e1PykNIYfw7x/kImpyYSGVpIcbMbRL9OtB7fuFOjhZgR6Kxw8+N5TeLBo41jzJjiDkqDXIFXEPUNd1mMaz+9LQEMm3qIfONtM2aZbi5nfdHsJssxJtrD3IaOM9sFpvutZWJLjyRE/tJYnukqUx+QAtSTwHT+2L35SVgL8EVYP/HkTvO/HuKFZLFk7DjrPoYib14JsFKLx4Y12hF1AS6Kfb2S0WGFHsY2xPwNq4j7iJI1GMsNhz+5mVB8K8cI57vT+OQGwCMPztc24bKBrYvhmpgTGYUWPU06/1N+eHpdb7FX7eg0jxL611dLazMablvg7t5LC0aJ+UYrtXXEam73EYY2Fuxgm85qcIsWct7EFK8iNH9Q=
+  on:
+    tags: true
