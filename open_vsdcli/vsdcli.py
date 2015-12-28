@@ -1498,16 +1498,19 @@ def vport_delete(ctx, vport_id):
                                  'DISABLED',
                                  'INHERITED']),
               required=True)
+@click.option('--vlan-id', metavar='<id>', help='Required for BRIDGE and HOST creation')
 @click.option('--subnet-id', metavar='<id>')
 @click.option('--l2domain-id', metavar='<id>')
 @click.pass_context
-def vport_create(ctx, name, type, active, address_spoofing, **ids):
+def vport_create(ctx, name, type, active, address_spoofing, vlan_id, **ids):
     """Add an vport to a given subnet or l2domain"""
     id_type, id = check_id(**ids)
     params = {'name' : name,
               'type': type,
               'active': active,
               'addressSpoofing': address_spoofing}
+    if vlan_id:
+        params['VLANID'] = vlan_id
     result = ctx.obj['nc'].post("%ss/%s/vports" % (id_type, id), params)[0]
     print_object(result, only=ctx.obj['show_only'])
 
