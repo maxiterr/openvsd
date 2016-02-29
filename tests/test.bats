@@ -181,6 +181,72 @@ setup() {
 }
 
 
+@test "free-api: use with non-existing verb" {
+    run vsd free-api enterprises --verb FALSE
+    assert_fail
+    assert_line_equals -1 'Error: Invalid value for "--verb": invalid choice: FALSE. (choose from PUT, GET, POST, DELETE)'
+}
+
+
+@test "free-api: list all enterprises (GET as default)" {
+    run vsd free-api enterprises
+    assert_success
+    assert_output_contains '"name": "nulab-update"'
+    assert_output_contains '"name": "nulab-2"'
+    assert_output_contains '"name": "new-enterprise"'
+}
+
+
+@test "free-api: list all enterprises with GET" {
+    run vsd free-api enterprises --verb GET
+    assert_success
+    assert_output_contains '"name": "nulab-update"'
+    assert_output_contains '"name": "nulab-2"'
+    assert_output_contains '"name": "new-enterprise"'
+}
+
+
+@test "free-api: delete enterprise with DELETE" {
+    run vsd free-api enterprises/255d9673-7281-43c4-be57-fdec677f6e07?responseChoice=1 --verb DELETE
+    assert_success
+    assert_line_equals 0 '{}'
+}
+
+
+@test "free-api: create enterprise with POST and key-value" {
+    run vsd free-api enterprises --verb POST --key-value 'name:enterpriseTest'
+    assert_success
+    assert_line_equals 0 '['
+    assert_line_equals 1 '    {'
+    assert_line_equals 2 '        "ID": "255d9673-7281-43c4-be57-fdec677f6e07", '
+    assert_line_equals 3 '        "description": "None", '
+    assert_line_equals 4 '        "name": "enterpriseTest"'
+    assert_line_equals 5 '    }'
+    assert_line_equals 6 ']'
+}
+
+
+@test "free-api: update enterprise with PUT and body" {
+    run vsd free-api enterprises/255d9673-7281-43c4-be57-fdec677f6e07 --verb PUT --body '[{ "name": "new-enterprise", "description": "Test" }]'
+    assert_success
+    assert_line_equals 0 '{}'
+}
+
+
+@test "free-api: body needs to be a valid JSON" {
+    run vsd free-api enterprises/255d9673-7281-43c4-be57-fdec677f6e07 --verb PUT --body '[{ "name": }]'
+    assert_fail
+    assert_line_equals -1 'Error: Body could not be decoded as JSON'
+}
+
+
+@test "free-api: key-value and body are incompatible" {
+    run vsd free-api enterprises --body '[{ "name":"test" }]' --key-value 'name:test'
+    assert_fail
+    assert_line_equals -1 'Error: Use body or key-value'
+}
+
+
 @test "License: create" {
     run vsd license-create 12Z1223E23E23E23E23E23OMEX2KEOJ3EPOJ2A3EPXJP34RJC4P5IOJVPOIYJECEOP4XJPRO4JC5SRVDCOTJQXZQJ4PCJT5P
     assert_success

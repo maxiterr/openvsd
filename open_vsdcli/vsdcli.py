@@ -127,6 +127,47 @@ def me_show(ctx, verbose):
         print_object( result, exclude=['APIKey'], only=ctx.obj['show_only'] )
 
 
+@vsdcli.command(name='free-api')
+@click.argument('ressource', metavar='<ressource>', required=True)
+@click.option('--verb',
+              type=click.Choice(['PUT',
+                                 'GET',
+                                 'POST',
+                                 'DELETE']),
+              default='GET',
+              help='Default : GET')
+@click.option('--header', metavar='<name:value>', help='Add header to the request. Can be repeated.')
+@click.option('--key-value', metavar='<key:value>', multiple=True, help='Specify body in key/value pair. Can be repeated. Incompatible with --body.')
+@click.option('--body', metavar='<data json>', help='Specify body of the request in json format. Incompatible with --key-value.')
+@click.pass_context
+def free_api(ctx, ressource, verb, header, key_value, body):
+    """build your own API call (with headers and data)"""
+    import json
+    if key_value and body:
+        raise click.exceptions.UsageError(
+            "Use body or key-value")
+    if key_value:
+        params = {}
+        for kv in key_value:
+            key, value = kv.split(':',1)
+            params[key] = value
+    if body:
+        try:
+            params = json.loads(body)
+        except ValueError:
+            raise click.exceptions.UsageError(
+                "Body could not be decoded as JSON")
+    if verb == 'GET':
+        result = ctx.obj['nc'].get(ressource)
+    elif verb == 'PUT':
+        result = ctx.obj['nc'].put(ressource, params)
+    elif verb == 'POST':
+        result = ctx.obj['nc'].post(ressource, params)
+    elif verb == 'DELETE':
+        result = ctx.obj['nc'].delete(ressource)
+    print json.dumps(result, indent=4)
+
+
 @vsdcli.command(name='license-list')
 @click.pass_context
 def license_list(ctx):
