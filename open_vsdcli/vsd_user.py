@@ -5,16 +5,22 @@ from vsd_common import *
 @click.option('--enterprise-id', metavar='<id>')
 @click.option('--group-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for firstName, lastName, userName, email, lastUpdatedDate, creationDate, externalID')
+              help='Filter for firstName, lastName, userName, email, '
+                   'lastUpdatedDate, creationDate, externalID')
 @click.pass_context
 def user_list_list(ctx, filter, **ids):
     """list users for a given enterprise or group id"""
     id_type, id = check_id(**ids)
-    if filter == None:
-        result = ctx.obj['nc'].get("%ss/%s/users" %(id_type, id))
-    else :
-        result = ctx.obj['nc'].get("%ss/%s/users" %(id_type, id), filter=filter)
-    table=PrettyTable(["ID", "User name", "First name", "Last name", "Email"])
+    if not filter:
+        result = ctx.obj['nc'].get("%ss/%s/users" % (id_type, id))
+    else:
+        result = ctx.obj['nc'].get("%ss/%s/users" % (id_type, id),
+                                   filter=filter)
+    table = PrettyTable(["ID",
+                         "User name",
+                         "First name",
+                         "Last name",
+                         "Email"])
     for line in result:
         table.add_row([line['ID'],
                        line['userName'],
@@ -29,7 +35,7 @@ def user_list_list(ctx, filter, **ids):
 @click.pass_context
 def user_show(ctx, user_id):
     """Show information for a given user id"""
-    result = ctx.obj['nc'].get("users/%s" %user_id)[0]
+    result = ctx.obj['nc'].get("users/%s" % user_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -41,19 +47,18 @@ def user_show(ctx, user_id):
 @click.option('--password', metavar='<password>', required=True)
 @click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
 @click.pass_context
-def user_create(ctx, username, firstname, lastname, email, password, enterprise_id ):
+def user_create(ctx, username, firstname, lastname, email, password,
+                enterprise_id):
     """Add a user to the VSD"""
-
     import hashlib
-
     # Define mandotory values
-    params = {'userName' : username,
-        'firstName' : firstname,
-        'lastName'  : lastname,
-        'email'     : email,
-        'password'  : hashlib.sha1(password).hexdigest() }
-
-    result = ctx.obj['nc'].post("enterprises/%s/users" %enterprise_id, params)[0]
+    params = {'userName':  username,
+              'firstName': firstname,
+              'lastName':  lastname,
+              'email':     email,
+              'password':  hashlib.sha1(password).hexdigest()}
+    result = ctx.obj['nc'].post("enterprises/%s/users" %
+                                enterprise_id, params)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -62,7 +67,7 @@ def user_create(ctx, username, firstname, lastname, email, password, enterprise_
 @click.pass_context
 def user_delete(ctx, user_id):
     """Delete a given user"""
-    ctx.obj['nc'].delete("users/%s" %user_id)
+    ctx.obj['nc'].delete("users/%s" % user_id)
 
 
 @vsdcli.command(name='user-update')
@@ -73,10 +78,10 @@ def user_update(ctx, user_id, key_value):
     """Update key/value for a given user"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
-    ctx.obj['nc'].put("users/%s" %user_id, params)
-    result = ctx.obj['nc'].get("users/%s" %user_id)[0]
+    ctx.obj['nc'].put("users/%s" % user_id, params)
+    result = ctx.obj['nc'].get("users/%s" % user_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -84,7 +89,8 @@ def user_update(ctx, user_id, key_value):
 @click.option('--enterprise-id', metavar='<id>')
 @click.option('--user-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for name, description, role, private, lastUpdatedDate, creationDate, externalID')
+              help='Filter for name, description, role, private, '
+                   'lastUpdatedDate, creationDate, externalID')
 @click.pass_context
 def group_list(ctx, filter, **ids):
     """list groups for a given enterprise id or that an user belongs to"""
@@ -92,8 +98,9 @@ def group_list(ctx, filter, **ids):
     if not filter:
         result = ctx.obj['nc'].get("%ss/%s/groups" % (id_type, id))
     else:
-        result = ctx.obj['nc'].get("%ss/%s/groups" %(id_type, id), filter=filter)
-    table=PrettyTable(["ID", "Name", "Description", "Role", "Private"])
+        result = ctx.obj['nc'].get("%ss/%s/groups" % (id_type, id),
+                                   filter=filter)
+    table = PrettyTable(["ID", "Name", "Description", "Role", "Private"])
     table.max_width['Description'] = 40
     for line in result:
         table.add_row([line['ID'],
@@ -119,16 +126,17 @@ def group_show(ctx, group_id):
 @click.option('--description', metavar='<descrition>')
 @click.option('--private', metavar='<email>', count=True)
 @click.pass_context
-def group_create(ctx, name, enterprise_id , description, private ):
+def group_create(ctx, name, enterprise_id, description, private):
     """Add a group to the VSD"""
     # Define mandotory values
-    params = {'name' : name }
+    params = {'name': name}
     # Define optional values
     if description:
         params['description'] = description
     if private >= 1:
         params['private'] = True
-    result = ctx.obj['nc'].post("enterprises/%s/groups" % enterprise_id, params)[0]
+    result = ctx.obj['nc'].post("enterprises/%s/groups" % enterprise_id,
+                                params)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -140,9 +148,9 @@ def group_update(ctx, group_id, key_value):
     """Update key/value for a given group"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
-    ctx.obj['nc'].put("groups/%s" %group_id, params)
+    ctx.obj['nc'].put("groups/%s" % group_id, params)
     result = ctx.obj['nc'].get("groups/%s" % group_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
@@ -152,7 +160,7 @@ def group_update(ctx, group_id, key_value):
 @click.pass_context
 def group_delete(ctx, group_id):
     """Delete a given group"""
-    ctx.obj['nc'].delete("groups/%s" %group_id)
+    ctx.obj['nc'].delete("groups/%s" % group_id)
 
 
 @vsdcli.command(name='group-add-user')
@@ -164,8 +172,8 @@ def group_add_user(ctx, group_id, user_id):
     # Get all user for this group
     userList = ctx.obj['nc'].get("groups/%s/users" % group_id)
     user_ids = [u['ID'] for u in userList]
-    user_ids.append( user_id )
-    ctx.obj['nc'].put("groups/%s/users" %group_id, user_ids)
+    user_ids.append(user_id)
+    ctx.obj['nc'].put("groups/%s/users" % group_id, user_ids)
 
 
 @vsdcli.command(name='group-del-user')
@@ -195,23 +203,28 @@ def group_del_user(ctx, group_id, user_id):
 @click.option('--l2domain-id', metavar='<id>')
 @click.option('--l2domaintemplate-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for name, lastUpdatedDate, creationDate, externalID')
+              help='Filter for name, lastUpdatedDate, creationDate, '
+                   'externalID')
 @click.pass_context
 def permission_list(ctx, filter, **ids):
     """List all permissions"""
     id_type, id = check_id(**ids)
-    request = "%ss/%s/permissions" %(id_type, id)
-    if filter == None :
+    request = "%ss/%s/permissions" % (id_type, id)
+    if not filter:
         result = ctx.obj['nc'].get(request)
-    else :
+    else:
         result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "Action", "Entity ID", "Entity type", "Entity name"])
+    table = PrettyTable(["ID",
+                         "Action",
+                         "Entity ID",
+                         "Entity type",
+                         "Entity name"])
     for line in result:
         table.add_row([line['ID'],
                        line['permittedAction'],
                        line['permittedEntityID'],
                        line['permittedEntityType'],
-                       line['permittedEntityName'] ] )
+                       line['permittedEntityName']])
     print table
 
 
@@ -220,17 +233,17 @@ def permission_list(ctx, filter, **ids):
 @click.pass_context
 def permission_show(ctx, permission_id):
     """Show information for a given permission id"""
-    result = ctx.obj['nc'].get("permissions/%s" %permission_id)[0]
-    print_object( result, only=ctx.obj['show_only'] )
+    result = ctx.obj['nc'].get("permissions/%s" % permission_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
 
 
 @vsdcli.command(name='add-permission')
 @click.argument('entity-id', metavar='<group or user ID>', required=True)
-@click.option('--action', type=click.Choice(['USE',
-                                             'EXTEND',
-                                             'READ',
-                                             'INSTANTIATE']),
-              default='USE', help='Default : USE')
+@click.option('--action', default='USE', help='Default : USE',
+              type=click.Choice(['USE',
+                                 'EXTEND',
+                                 'READ',
+                                 'INSTANTIATE']))
 @click.option('--zone-id', metavar='<id>')
 @click.option('--domaintemplate-id', metavar='<id>')
 @click.option('--redundancygroup-id', metavar='<id>')
@@ -249,4 +262,4 @@ def add_permission(ctx, entity_id, action, **ids):
     params = {}
     params['permittedEntityID'] = entity_id
     params['permittedAction'] = action
-    ctx.obj['nc'].post("%ss/%s/permissions" %(id_type, id), params)
+    ctx.obj['nc'].post("%ss/%s/permissions" % (id_type, id), params)

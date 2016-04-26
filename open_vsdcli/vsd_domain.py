@@ -8,8 +8,9 @@ from vsd_common import *
 @click.pass_context
 def domaintemplate_list(ctx, enterprise_id, filter):
     """Show all domaintemplate for a given enterprise id"""
-    result = ctx.obj['nc'].get("enterprises/%s/domaintemplates" %enterprise_id, filter=filter)
-    table=PrettyTable(["Domain Template ID", "Name"])
+    result = ctx.obj['nc'].get("enterprises/%s/domaintemplates" %
+                               enterprise_id, filter=filter)
+    table = PrettyTable(["Domain Template ID", "Name"])
     for line in result:
         table.add_row([line['ID'],
                        line['name']])
@@ -17,11 +18,12 @@ def domaintemplate_list(ctx, enterprise_id, filter):
 
 
 @vsdcli.command(name='domaintemplate-show')
-@click.argument('domaintemplate-id', metavar='<domaintemplate-id>', required=True)
+@click.argument('domaintemplate-id', metavar='<domaintemplate-id>',
+                required=True)
 @click.pass_context
 def domaintemplate_show(ctx, domaintemplate_id):
     """Show information for a given domaintemplate id"""
-    result = ctx.obj['nc'].get("domaintemplates/%s" %domaintemplate_id)[0]
+    result = ctx.obj['nc'].get("domaintemplates/%s" % domaintemplate_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -31,31 +33,34 @@ def domaintemplate_show(ctx, domaintemplate_id):
 @click.pass_context
 def domaintemplate_create(ctx, name, enterprise_id):
     """Add an domaintemplate to the VSD for an given enterprise"""
-    params = {'name' : name}
-    result = ctx.obj['nc'].post("enterprises/%s/domaintemplates" %enterprise_id, params)[0]
+    params = {'name': name}
+    result = ctx.obj['nc'].post("enterprises/%s/domaintemplates" %
+                                enterprise_id, params)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
 @vsdcli.command(name='domaintemplate-delete')
-@click.argument('domaintemplate-id', metavar='<domaintemplate ID>', required=True)
+@click.argument('domaintemplate-id', metavar='<domaintemplate ID>',
+                required=True)
 @click.pass_context
 def domaintemplate_delete(ctx, domaintemplate_id):
     """Delete a given domaintemplate"""
-    ctx.obj['nc'].delete("domaintemplates/%s" %domaintemplate_id)
+    ctx.obj['nc'].delete("domaintemplates/%s" % domaintemplate_id)
 
 
 @vsdcli.command(name='domaintemplate-update')
-@click.argument('domaintemplate-id', metavar='<domaintemplate ID>', required=True)
+@click.argument('domaintemplate-id', metavar='<domaintemplate ID>',
+                required=True)
 @click.option('--key-value', metavar='<key:value>', multiple=True)
 @click.pass_context
 def domaintemplate_update(ctx, domaintemplate_id, key_value):
     """Update key/value for a given domaintemplate"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
-    ctx.obj['nc'].put("domaintemplates/%s" %domaintemplate_id, params)
-    result = ctx.obj['nc'].get("domaintemplates/%s" %domaintemplate_id)[0]
+    ctx.obj['nc'].put("domaintemplates/%s" % domaintemplate_id, params)
+    result = ctx.obj['nc'].get("domaintemplates/%s" % domaintemplate_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -63,21 +68,25 @@ def domaintemplate_update(ctx, domaintemplate_id, key_value):
 @click.option('--domaintemplate-id', metavar='<id>')
 @click.option('--enterprise-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for serviceID, name, description, customerID, labelID, serviceID, lastUpdatedDate, creationDate, externalID')
+              help='Filter for serviceID, name, description, customerID, '
+                   'labelID, serviceID, lastUpdatedDate, creationDate, '
+                   'externalID')
 @click.pass_context
 def domain_list(ctx, filter, **ids):
     """Show domain for a given enterprise or domain id"""
     id_type, id = check_id(**ids)
-    if filter == None:
-        result = ctx.obj['nc'].get("%ss/%s/domains" %(id_type, id))
+    if not filter:
+        result = ctx.obj['nc'].get("%ss/%s/domains" % (id_type, id))
     else:
-        result = ctx.obj['nc'].get("%ss/%s/domains" %(id_type, id), filter=filter)
-    table=PrettyTable(["Domain ID", "Name", "Description", "RT / RD"])
+        result = ctx.obj['nc'].get("%ss/%s/domains" % (id_type, id),
+                                   filter=filter)
+    table = PrettyTable(["Domain ID", "Name", "Description", "RT / RD"])
     for line in result:
-        table.add_row([line['ID'],
-                       line['name'],
-                       line['description'],
-                       line['routeTarget'] + " / " + line['routeDistinguisher']])
+        table.add_row([
+            line['ID'],
+            line['name'],
+            line['description'],
+            line['routeTarget'] + " / " + line['routeDistinguisher']])
     print table
 
 
@@ -86,7 +95,7 @@ def domain_list(ctx, filter, **ids):
 @click.pass_context
 def domain_show(ctx, domain_id):
     """Show information for a given domain id"""
-    result = ctx.obj['nc'].get("domains/%s" %domain_id)[0]
+    result = ctx.obj['nc'].get("domains/%s" % domain_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -99,13 +108,14 @@ def domain_show(ctx, domain_id):
 @click.pass_context
 def domain_create(ctx, name, enterprise_id, template_id, rt, rd):
     """Add an domain to the VSD for an given enterprise"""
-    params = {'name': name, 
+    params = {'name':       name,
               'templateID': template_id}
     if rt:
         params['routeTarget'] = rt
-    if rd != None: 
+    if rd:
         params['routeDistinguisher'] = rd
-    result = ctx.obj['nc'].post("enterprises/%s/domains" %enterprise_id, params)[0]
+    result = ctx.obj['nc'].post("enterprises/%s/domains" %
+                                enterprise_id, params)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -114,7 +124,7 @@ def domain_create(ctx, name, enterprise_id, template_id, rt, rd):
 @click.pass_context
 def domain_delete(ctx, domain_id):
     """Delete a given domain"""
-    ctx.obj['nc'].delete("domains/%s" %domain_id)
+    ctx.obj['nc'].delete("domains/%s" % domain_id)
 
 
 @vsdcli.command(name='domain-update')
@@ -125,25 +135,29 @@ def domain_update(ctx, domain_id, key_value):
     """Update key/value for a given domain"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
-    ctx.obj['nc'].put("domains/%s" %domain_id, params)
-    result = ctx.obj['nc'].get("domains/%s" %domain_id)[0]
+    ctx.obj['nc'].put("domains/%s" % domain_id, params)
+    result = ctx.obj['nc'].get("domains/%s" % domain_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
 @vsdcli.command(name='zone-list')
 @click.option('--domain-id', metavar='<domain ID>', required=True)
 @click.option('--filter', metavar='<filter>',
-              help='Filter for address, netmask, IPType, name, description, numberOfHostsInSubnets, publicZone, address, netmask, IPType, name, address, netmask, IPType, name, lastUpdatedDate, creationDate, externalID')
+              help='Filter for address, netmask, IPType, name, description, '
+                   'numberOfHostsInSubnets, publicZone, address, netmask, '
+                   'IPType, name, address, netmask, IPType, name, '
+                   'lastUpdatedDate, creationDate, externalID')
 @click.pass_context
 def zone_list(ctx, domain_id, filter):
     """Show zone for a given domain id"""
     if not filter:
-        result = ctx.obj['nc'].get("domains/%s/zones" %domain_id)
+        result = ctx.obj['nc'].get("domains/%s/zones" % domain_id)
     else:
-        result = ctx.obj['nc'].get("domains/%s/zones" %domain_id, filter=filter)
-    table=PrettyTable(["Zone ID", "Name" ])
+        result = ctx.obj['nc'].get("domains/%s/zones" % domain_id,
+                                   filter=filter)
+    table = PrettyTable(["Zone ID", "Name"])
     for line in result:
         table.add_row([line['ID'],
                        line['name']])
@@ -155,7 +169,7 @@ def zone_list(ctx, domain_id, filter):
 @click.pass_context
 def zone_show(ctx, zone_id):
     """Show information for a given zone id"""
-    result = ctx.obj['nc'].get("zones/%s" %zone_id)[0]
+    result = ctx.obj['nc'].get("zones/%s" % zone_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -163,10 +177,10 @@ def zone_show(ctx, zone_id):
 @click.argument('name', metavar='<name>', required=True)
 @click.option('--domain-id', metavar='<domain ID>', required=True)
 @click.pass_context
-def zone_create(ctx, name, domain_id ):
+def zone_create(ctx, name, domain_id):
     """Add a zone to the VSD for an given domain"""
     params = {'name': name}
-    result = ctx.obj['nc'].post("domains/%s/zones" %domain_id, params)[0]
+    result = ctx.obj['nc'].post("domains/%s/zones" % domain_id, params)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -175,4 +189,4 @@ def zone_create(ctx, name, domain_id ):
 @click.pass_context
 def zone_delete(ctx, zone_id):
     """Delete a given zone"""
-    ctx.obj['nc'].delete("zones/%s" %zone_id)
+    ctx.obj['nc'].delete("zones/%s" % zone_id)

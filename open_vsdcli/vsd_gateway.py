@@ -5,21 +5,28 @@ from vsd_common import *
 @click.option('--enterprise-id', metavar='<ID>')
 @click.option('--redundancygroup-id', metavar='<ID>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for pending, systemID, name, description, personality, lastUpdatedDate, creationDate, externalID')
+              help='Filter for pending, systemID, name, description, '
+                   'personality, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
 def gateway_list_list(ctx, enterprise_id, redundancygroup_id, filter):
     """list gateways for a given enterprise or group id"""
-    if enterprise_id != None:
-        url_request = "enterprises/%s/gateways" %enterprise_id
-    elif redundancygroup_id != None:
-        url_request = "redundancygroups/%s/gateways" %redundancygroup_id
+    if enterprise_id:
+        url_request = "enterprises/%s/gateways" % enterprise_id
+    elif redundancygroup_id:
+        url_request = "redundancygroups/%s/gateways" % redundancygroup_id
     else:
         url_request = "gateways"
     if not filter:
         result = ctx.obj['nc'].get(url_request)
     else:
         result = ctx.obj['nc'].get(url_request, filter=filter)
-    table=PrettyTable(["ID", "System ID", "Name", "Description", "Pending", "Redundancy Group ID", "Personality"])
+    table = PrettyTable(["ID",
+                         "System ID",
+                         "Name",
+                         "Description",
+                         "Pending",
+                         "Redundancy Group ID",
+                         "Personality"])
     for line in result:
         table.add_row([line['ID'],
                        line['systemID'],
@@ -36,8 +43,8 @@ def gateway_list_list(ctx, enterprise_id, redundancygroup_id, filter):
 @click.pass_context
 def group_show(ctx, gateway_id):
     """Show information for a given gateway ID"""
-    result = ctx.obj['nc'].get("gateways/%s" %gateway_id)[0]
-    print_object( result, only=ctx.obj['show_only'])
+    result = ctx.obj['nc'].get("gateways/%s" % gateway_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
 
 
 @vsdcli.command(name='gateway-update')
@@ -48,10 +55,10 @@ def gateway_update(ctx, gateway_id, key_value):
     """Update key/value for a given gateway"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
-    ctx.obj['nc'].put("gateways/%s" %gateway_id, params)
-    result = ctx.obj['nc'].get("gateways/%s" %gateway_id)[0]
+    ctx.obj['nc'].put("gateways/%s" % gateway_id, params)
+    result = ctx.obj['nc'].get("gateways/%s" % gateway_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
@@ -60,22 +67,26 @@ def gateway_update(ctx, gateway_id, key_value):
 @click.option('--gateway-id', metavar='<id>')
 @click.option('--autodiscoveredgateway-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for name, physicalName, portType, userMnemonic, useUserMnemonic, name, description, physicalName, portType, VLANRange, lastUpdatedDate, creationDate, externalID')
+              help='Filter for name, physicalName, portType, userMnemonic, '
+                   'useUserMnemonic, name, description, physicalName, '
+                   'portType, VLANRange, lastUpdatedDate, creationDate, '
+                   'externalID')
 @click.pass_context
 def port_list(ctx, filter, **ids):
-    """List all port for a given redundancygroup, gateway or autodiscoveredgateway"""
+    """List all port for a given redundancygroup, gateway or
+       autodiscoveredgateway"""
     id_type, id = check_id(**ids)
-    request = "%ss/%s/ports" %(id_type, id)
-    if filter == None :
+    request = "%ss/%s/ports" % (id_type, id)
+    if not filter:
         result = ctx.obj['nc'].get(request)
-    else :
+    else:
         result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "name", "physicalName", "Type"])
+    table = PrettyTable(["ID", "name", "physicalName", "Type"])
     for line in result:
         table.add_row([line['ID'],
                        line['name'],
                        line['physicalName'],
-                       line['portType'] ])
+                       line['portType']])
     print table
 
 
@@ -96,21 +107,23 @@ def port_update(ctx, port_id, key_value):
     """Update key/value for a given port"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
-    ctx.obj['nc'].put("ports/%s" %port_id, params)
-    result = ctx.obj['nc'].get("ports/%s" %port_id)[0]
-    print_object( result, only=ctx.obj['show_only'] )
+    ctx.obj['nc'].put("ports/%s" % port_id, params)
+    result = ctx.obj['nc'].get("ports/%s" % port_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
 
 @vsdcli.command(name='vlan-list')
 @click.option('--port-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for value, userMnemonic, useUserMnemonic, description, lastUpdatedDate, creationDate, externalID')
+              help='Filter for value, userMnemonic, useUserMnemonic, '
+                   'description, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
 def vlan_list(ctx, filter, port_id):
     """List all port for a given port"""
     result = ctx.obj['nc'].get("ports/%s/vlans" % port_id, filter=filter)
-    table=PrettyTable(["ID", "name", "value", "userMnemonic"])
+    table = PrettyTable(["ID", "name", "value", "userMnemonic"])
     for line in result:
         table.add_row([line['ID'],
                        line['description'],
@@ -137,12 +150,12 @@ def vlan_show(ctx, vlan_id):
 def vlan_create(ctx, port_id, vlan, mnemonic, description):
     """Add vlan for a given port"""
     params = {}
-    if mnemonic is not None:
+    if mnemonic:
         params['userMnemonic'] = mnemonic
         params['useUserMnemonic'] = True
-    if description is not None:
+    if description:
         params['description'] = description
-    #TODO: Check vlan is able to be converted.
+    # TODO: Check vlan is able to be converted.
     params['value'] = int(vlan)
     result = ctx.obj['nc'].post("ports/%s/vlans" % port_id, params)[0]
     print_object(result, only=ctx.obj['show_only'])
@@ -156,10 +169,10 @@ def vlan_update(ctx, vlan_id, key_value):
     """Update key/value for a given vlan"""
     params = {}
     for kv in key_value:
-        #TODO : check key_value is "str:str" in order to be parsable
-        key, value = kv.split(':',1)
+        # TODO : check key_value is "str:str" in order to be parsable
+        key, value = kv.split(':', 1)
         params[key] = value
-    ctx.obj['nc'].put("vlans/%s" %vlan_id, params)
+    ctx.obj['nc'].put("vlans/%s" % vlan_id, params)
     result = ctx.obj['nc'].get("vlans/%s" % vlan_id)[0]
     print_object(result, only=ctx.obj['show_only'])
 
@@ -169,7 +182,7 @@ def vlan_update(ctx, vlan_id, key_value):
 @click.pass_context
 def vlan_delete(ctx, vlan_id):
     """Delete a given vlan"""
-    ctx.obj['nc'].delete("vlans/%s" %vlan_id)
+    ctx.obj['nc'].delete("vlans/%s" % vlan_id)
 
 
 @vsdcli.command(name='bridgeinterface-list')
@@ -177,18 +190,17 @@ def vlan_delete(ctx, vlan_id):
 @click.option('--l2domain-id', metavar='<id>')
 @click.option('--vport-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for name, type, lastUpdatedDate, creationDate, externalID')
+              help='Filter for name, type, lastUpdatedDate, creationDate, '
+                   'externalID')
 @click.pass_context
 def bridgeinterface_list(ctx, filter, **ids):
     """List all bridge interface for a given domain, l2domain or vport"""
     id_type, id = check_id(**ids)
-    request = "%ss/%s/bridgeinterfaces" %(id_type, id)
+    request = "%ss/%s/bridgeinterfaces" % (id_type, id)
     result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "name", "VPortID"])
+    table = PrettyTable(["ID", "name", "VPortID"])
     for line in result:
         table.add_row([line['ID'],
                        line['name'],
                        line['VPortID']])
     print table
-
-

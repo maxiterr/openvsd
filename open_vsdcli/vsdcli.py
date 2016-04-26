@@ -14,7 +14,6 @@
 #    under the License.
 
 
-#from vsd_common import *
 from vsd_license import *
 from vsd_enterprise import *
 from vsd_domain import *

@@ -14,17 +14,17 @@ from vsd_common import *
 def vporttag_list(ctx, filter, **ids):
     """List all vPort tag"""
     id_type, id = check_id(**ids)
-    request = "%ss/%s/vporttags" %(id_type, id)
-    if filter == None :
+    request = "%ss/%s/vporttags" % (id_type, id)
+    if not filter:
         result = ctx.obj['nc'].get(request)
-    else :
+    else:
         result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "Description", "Name", "endPoint Type" ])
+    table = PrettyTable(["ID", "Description", "Name", "endPoint Type"])
     for line in result:
-        table.add_row( [ line['ID'],
-                        line['description'],
-                        line['name'],
-                        line['endPointType'] ] )
+        table.add_row([line['ID'],
+                       line['description'],
+                       line['name'],
+                       line['endPointType']])
     print table
 
 
@@ -36,14 +36,16 @@ def vporttag_list(ctx, filter, **ids):
 @click.option('--vporttag-id', metavar='<id>')
 @click.option('--subnet-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for name, type, lastUpdatedDate, creationDate, externalID')
+              help='Filter for name, type, lastUpdatedDate, creationDate, '
+                   'externalID')
 @click.pass_context
 def vport_list(ctx, filter, **ids):
-    """List all ingress acl template for a given domain, l2domain, floatingip, vrs or vporttag"""
+    """List all ingress acl template for a given domain, l2domain, floatingip,
+       vrs or vporttag"""
     id_type, id = check_id(**ids)
-    request = "%ss/%s/vports" %(id_type, id)
+    request = "%ss/%s/vports" % (id_type, id)
     result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "name", "active", "type"])
+    table = PrettyTable(["ID", "name", "active", "type"])
     for line in result:
         table.add_row([line['ID'],
                        line['name'],
@@ -69,7 +71,7 @@ def vport_update(ctx, vport_id, key_value):
     """Update key/value for a given vport"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
     ctx.obj['nc'].put("vports/%s" % vport_id, params)
     result = ctx.obj['nc'].get("vports/%s" % vport_id)[0]
@@ -97,16 +99,17 @@ def vport_delete(ctx, vport_id):
                                  'DISABLED',
                                  'INHERITED']),
               required=True)
-@click.option('--vlan-id', metavar='<id>', help='Required for BRIDGE and HOST creation')
+@click.option('--vlan-id', metavar='<id>',
+              help='Required for BRIDGE and HOST creation')
 @click.option('--subnet-id', metavar='<id>')
 @click.option('--l2domain-id', metavar='<id>')
 @click.pass_context
 def vport_create(ctx, name, type, active, address_spoofing, vlan_id, **ids):
     """Add an vport to a given subnet or l2domain"""
     id_type, id = check_id(**ids)
-    params = {'name' : name,
-              'type': type,
-              'active': active,
+    params = {'name':            name,
+              'type':            type,
+              'active':          active,
               'addressSpoofing': address_spoofing}
     if vlan_id:
         params['VLANID'] = vlan_id
@@ -131,7 +134,7 @@ def bridgeinterface_update(ctx, bridgeinterface_id, key_value):
     """Update key/value for a given bridgeinterface"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
     ctx.obj['nc'].put("bridgeinterfaces/%s" % bridgeinterface_id, params)
     result = ctx.obj['nc'].get("bridgeinterfaces/%s" % bridgeinterface_id)[0]
@@ -152,7 +155,7 @@ def bridgeinterface_delete(ctx, bridgeinterface_id):
 @click.pass_context
 def bridgeinterface_create(ctx, name, vport_id):
     """Add an bridge interface to a given vport"""
-    params = {'name' : name}
-    result = ctx.obj['nc'].post("vports/%s/bridgeinterfaces" % vport_id, params)[0]
+    params = {'name': name}
+    result = ctx.obj['nc'].post("vports/%s/bridgeinterfaces" % vport_id,
+                                params)[0]
     print_object(result, only=ctx.obj['show_only'])
-

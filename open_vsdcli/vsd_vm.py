@@ -14,7 +14,8 @@ from vsd_common import *
 @click.option('--user-id', metavar='<id>')
 @click.option('--subnet-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for UUID, name, status, reasonType, hypervisorIP, lastUpdatedDate, creationDate, externalID')
+              help='Filter for UUID, name, status, reasonType, hypervisorIP, '
+                   'lastUpdatedDate, creationDate, externalID')
 @click.pass_context
 def vm_list(ctx, filter, **ids):
     """List all VMs"""
@@ -27,7 +28,12 @@ def vm_list(ctx, filter, **ids):
         result = ctx.obj['nc'].get(request)
     else:
         result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "Vm UUID", "Name", "Status", "Hypervisor IP", "Reason Type"])
+    table = PrettyTable(["ID",
+                         "Vm UUID",
+                         "Name",
+                         "Status",
+                         "Hypervisor IP",
+                         "Reason Type"])
     for line in result:
         table.add_row([line['ID'],
                        line['UUID'],
@@ -44,7 +50,8 @@ def vm_list(ctx, filter, **ids):
 def vm_show(ctx, vm_id):
     """Show information for a given VM ID"""
     result = ctx.obj['nc'].get("vms/%s" % vm_id)[0]
-    print_object(result,exclude=['interfaces','resyncInfo'], only=ctx.obj['show_only'])
+    print_object(result, exclude=['interfaces', 'resyncInfo'],
+                 only=ctx.obj['show_only'])
 
 
 @vsdcli.command(name='vm-delete')
@@ -62,7 +69,8 @@ def vm_delete(ctx, vm_id):
 @click.option('--vport-id', metavar='<id>')
 @click.option('--domain-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for name, IPAddress, MAC, name, IPAddress, name, lastUpdatedDate, creationDate, externalID')
+              help='Filter for name, IPAddress, MAC, name, IPAddress, name, '
+                   'lastUpdatedDate, creationDate, externalID')
 @click.pass_context
 def vminterfaces_list(ctx, filter, **ids):
     """List VM interfaces"""
@@ -70,14 +78,19 @@ def vminterfaces_list(ctx, filter, **ids):
     if (id and not id_type) or (not id and id_type):
         raise Exception("Set id and id-type")
     if id_type:
-        request = "%ss/%s/vminterfaces" %(id_type, id)
+        request = "%ss/%s/vminterfaces" % (id_type, id)
     else:
-        request = "vminterfaces" 
+        request = "vminterfaces"
     if not filter:
         result = ctx.obj['nc'].get(request)
     else:
         result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "VM UUID", "IP Address", "Netmask" , "Floating IP", "MAC" ])
+    table = PrettyTable(["ID",
+                         "VM UUID",
+                         "IP Address",
+                         "Netmask",
+                         "Floating IP",
+                         "MAC"])
     for line in result:
         table.add_row([line['ID'],
                        line['VMUUID'],
@@ -105,8 +118,8 @@ def vminterface_update(ctx, vminterface_id, key_value):
     """Update key/value for a given vminterface"""
     params = {}
     for kv in key_value:
-        key, value = kv.split(':',1)
+        key, value = kv.split(':', 1)
         params[key] = value
-    ctx.obj['nc'].put("vminterfaces/%s" %vminterface_id, params)
-    result = ctx.obj['nc'].get("vminterfaces/%s" %vminterface_id)[0]
+    ctx.obj['nc'].put("vminterfaces/%s" % vminterface_id, params)
+    result = ctx.obj['nc'].get("vminterfaces/%s" % vminterface_id)[0]
     print_object(result, only=ctx.obj['show_only'])

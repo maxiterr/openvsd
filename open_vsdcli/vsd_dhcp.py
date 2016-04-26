@@ -11,20 +11,22 @@ from vsd_common import *
 @click.option('--domain-id', metavar='<id>')
 @click.option('--zone-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for type, length, value, lastUpdatedDate, creationDate, externalID')
+              help='Filter for type, length, value, lastUpdatedDate,'
+                   ' creationDate, externalID')
 @click.pass_context
 def dhcp_option_list(ctx, filter, **ids):
-    """List all dhcp option for a given vminterface, hostinterface, hostinterface, bridgeinterface,
-sharednetworkresource, subnet, l2domain, domain, zone"""
+    """List all dhcp option for a given vminterface, hostinterface,
+    hostinterface, bridgeinterface, sharednetworkresource,
+    subnet, l2domain, domain, zone"""
     id_type, id = check_id(**ids)
-    request = "%ss/%s/dhcpoptions" %(id_type, id)
+    request = "%ss/%s/dhcpoptions" % (id_type, id)
     result = ctx.obj['nc'].get(request, filter=filter)
-    table=PrettyTable(["ID", "Type", "Value", "Length"])
+    table = PrettyTable(["ID", "Type", "Value", "Length"])
     for line in result:
         table.add_row([line['ID'],
                        line['type'],
                        line['value'],
-                       line['length'] ] )
+                       line['length']])
     print table
 
 
@@ -33,8 +35,8 @@ sharednetworkresource, subnet, l2domain, domain, zone"""
 @click.pass_context
 def dhcp_option_show(ctx, dhcpoption_id):
     """Show information for a given dhcp option id"""
-    result = ctx.obj['nc'].get("dhcpoptions/%s" %dhcpoption_id)[0]
-    print_object( result, only=ctx.obj['show_only'] )
+    result = ctx.obj['nc'].get("dhcpoptions/%s" % dhcpoption_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
 
 
 @vsdcli.command(name='dhcp-option-delete')
@@ -42,7 +44,7 @@ def dhcp_option_show(ctx, dhcpoption_id):
 @click.pass_context
 def dhcp_option_delete(ctx, dhcpoption_id):
     """Delete a given dhcp option ID"""
-    ctx.obj['nc'].delete("dhcpoptions/%s" %dhcpoption_id)
+    ctx.obj['nc'].delete("dhcpoptions/%s" % dhcpoption_id)
 
 
 @vsdcli.command(name='dhcp-option-add')
@@ -56,14 +58,17 @@ def dhcp_option_delete(ctx, dhcpoption_id):
 @click.option('--length', metavar='<dhcp length>', required=True)
 @click.pass_context
 def dhcp_option_add(ctx, value, type, length,  **ids):
-    """Add a dhcpoption (type, value, length) for a given sharednetworkresource, subnet, l2domain, domain, zone"""
+    """Add a dhcpoption (type, value, length) for a given sharednetworkresource,
+    subnet, l2domain, domain, zone"""
     id_type, id = check_id(**ids)
     params = {}
     params['value'] = value
     params['type'] = type
     params['length'] = length
-    result = ctx.obj['nc'].post("%ss/%s/dhcpoptions" %(id_type,id) , params)[0]
-    print_object( result, only=ctx.obj['show_only'] )
+    result = ctx.obj['nc'].post("%ss/%s/dhcpoptions" % (id_type, id),
+                                params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
 
 def decode_ip(data):
     """Decode IP address. Fulfill with 0 at the end if needed"""
@@ -87,7 +92,7 @@ def encode_ip(ip, mask=None):
     if mask == 0:
         return '00'  # As Define in RFC
     data = ''
-    if mask != None:
+    if mask:
         byte_count = (mask-1)/8+1
         data = hex(mask)[2:].zfill(2)
     else:
@@ -100,8 +105,8 @@ def encode_ip(ip, mask=None):
 
 
 def decode_route(data):
-    """Extract all mask/ip from data. Data is a string encoded accordinaly with RFC3442"""
-
+    """Extract all mask/ip from data. Data is a string encoded
+    accordinaly with RFC3442"""
     route = []
     while len(data) > 0:
         mask = int(data[:2], 16)
@@ -115,16 +120,15 @@ def decode_route(data):
             data = data[2*byte:]
         gateway = decode_ip(data[:8])
         data = data[8:]
-        route.append({'mask':str(mask),
-                      'subnet':subnet,
-                      'gateway':gateway})
+        route.append({'mask':    str(mask),
+                      'subnet':  subnet,
+                      'gateway': gateway})
     return route
 
 
 def encode_route(route):
     """Encode a list of route (a route is a dict with subnet, mask and gateway)
        into string accordinaly with RFC3442"""
-
     data = ''
     while len(route) > 0:
         r = route.pop()
@@ -134,12 +138,11 @@ def encode_route(route):
 
 
 def decode_dhcp_data(data):
-    """data is the raw result from the API
-       Return a list of dict, with dict contains (subnet, mask, gateway, option)
+    """data is the raw result from the API. Return a list of dict,
+       with dict contains (subnet, mask, gateway, option)
        for each route"""
-
-    data_f9 = [ item for item in data if item['type'] == 'f9']
-    data_79 = [ item for item in data if item['type'] == '79']
+    data_f9 = [item for item in data if item['type'] == 'f9']
+    data_79 = [item for item in data if item['type'] == '79']
     if len(data_f9) > 1 and len(data_79) > 1:
         raise Exception("Abnormal count of DHCP option")
     route = []
@@ -149,7 +152,8 @@ def decode_dhcp_data(data):
         route_f9 = decode_route(data_f9[0]['value'])
     if len(data_79) != 0:
         route_79 = decode_route(data_79[0]['value'])
-    route = [dict(t) for t in set([tuple(d.items()) for d in route_79 + route_f9])]
+    route = [dict(t) for t in set([tuple(d.items())
+                                  for d in route_79 + route_f9])]
     route_w_option = []
     for r in route:
         option = []
@@ -157,7 +161,7 @@ def decode_dhcp_data(data):
             option.append('f9')
         if r in route_79:
             option.append('79')
-        r.update({'option':option})
+        r.update({'option': option})
         route_w_option.append(r)
     return route_w_option
 
@@ -170,23 +174,26 @@ def decode_dhcp_data(data):
 @click.option('--subnet-id', metavar='<id>')
 @click.option('--l2domain-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for type, length, value, lastUpdatedDate, creationDate, externalID')
+              help='Filter for type, length, value, lastUpdatedDate, '
+                   'creationDate, externalID')
 @click.pass_context
 def dhcp_route_list(ctx, filter, **ids):
-    """List all routes in dhcp option for a given vminterface, hostinterface, hostinterface, bridgeinterface,
-sharednetworkresource, subnet, l2domain"""
+    """List all routes in dhcp option for a given vminterface, hostinterface
+       hostinterface, bridgeinterface, sharednetworkresource, subnet,
+       l2domain"""
     id_type, id = check_id(**ids)
-    request = "%ss/%s/dhcpoptions" %(id_type, id)
+    request = "%ss/%s/dhcpoptions" % (id_type, id)
     result = ctx.obj['nc'].get(request, filter=filter)
 
     route = decode_dhcp_data(result)
 
-    table=PrettyTable(["Subnet", "Gateway", "option"])
+    table = PrettyTable(["Subnet", "Gateway", "option"])
     for line in route:
         table.add_row([line['subnet'] + '/' + line['mask'],
                        line['gateway'],
-                       line['option'] ] )
+                       line['option']])
     print table
+
 
 @vsdcli.command(name='dhcp-route-add')
 @click.option('--vminterface-id', metavar='<id>')
@@ -200,19 +207,20 @@ sharednetworkresource, subnet, l2domain"""
 @click.option('--gateway', required=True)
 @click.pass_context
 def dhcp_route_add(ctx, subnet, mask, gateway, **ids):
-    """Add route in dhcp option for a given vminterface, hostinterface, hostinterface,
-bridgeinterface, sharednetworkresource, subnet, l2domain"""
+    """Add route in dhcp option for a given vminterface, hostinterface,
+       hostinterface, bridgeinterface, sharednetworkresource, subnet, l2domain
+    """
     id_type, id = check_id(**ids)
-    result = ctx.obj['nc'].get("%ss/%s/dhcpoptions" %(id_type, id))
+    result = ctx.obj['nc'].get("%ss/%s/dhcpoptions" % (id_type, id))
     route = decode_dhcp_data(result)
 
     # TODO: Check if subnet and gateway are valid IP
     # TODO: Check mask is acceptable
     # TODO Check if route already exist, then raise execption
-    route.append({'subnet':subnet,
-                  'mask':mask,
-                  'gateway':gateway,
-                  'option':['f9', '79']})
+    route.append({'subnet':  subnet,
+                  'mask':    mask,
+                  'gateway': gateway,
+                  'option':  ['f9', '79']})
     encoded_route = encode_route(route)
 
     params = {}
@@ -222,13 +230,14 @@ bridgeinterface, sharednetworkresource, subnet, l2domain"""
     for option in result:
         if option['type'] in ['79', 'f9']:
             type_updated.append(option['type'])
-            ctx.obj['nc'].put("dhcpoptions/%s" %option['ID'], params)
+            ctx.obj['nc'].put("dhcpoptions/%s" % option['ID'], params)
     if '79' not in type_updated:
         params['type'] = '79'
-        ctx.obj['nc'].post("%ss/%s/dhcpoptions" %(id_type,id) , params)
+        ctx.obj['nc'].post("%ss/%s/dhcpoptions" % (id_type, id), params)
     if 'f9' not in type_updated:
         params['type'] = 'f9'
-        ctx.obj['nc'].post("%ss/%s/dhcpoptions" %(id_type,id) , params)
+        ctx.obj['nc'].post("%ss/%s/dhcpoptions" % (id_type, id), params)
+
 
 @vsdcli.command(name='dhcp-route-delete')
 @click.option('--vminterface-id', metavar='<id>')
@@ -243,17 +252,18 @@ bridgeinterface, sharednetworkresource, subnet, l2domain"""
 @click.pass_context
 def dhcp_route_delete(ctx, subnet, mask, gateway, **ids):
     """Remove route in dhcp option for a given vminterface, hostinterface,
-       hostinterface, bridgeinterface, sharednetworkresource, subnet, l2domain"""
+       hostinterface, bridgeinterface, sharednetworkresource, subnet, l2domain
+    """
     id_type, id = check_id(**ids)
-    result = ctx.obj['nc'].get("%ss/%s/dhcpoptions" %(id_type, id))
+    result = ctx.obj['nc'].get("%ss/%s/dhcpoptions" % (id_type, id))
     route_list = decode_dhcp_data(result)
     if not len(route_list):
         raise Exception("No route to delete")
     # TODO: Check if subnet and gateway are valid IP
     # TODO: Check mask is acceptable
-    route_to_remove = {'subnet':subnet,
-                    'mask': mask,
-                    'gateway': gateway}
+    route_to_remove = {'subnet':  subnet,
+                       'mask':    mask,
+                       'gateway': gateway}
     new_route_list = []
     change = 0
     for route in route_list:
@@ -268,7 +278,7 @@ def dhcp_route_delete(ctx, subnet, mask, gateway, **ids):
         # Remove dhcp option because no more route
         for option in result:
             if option['type'] == '79' or option['type'] == 'f9':
-                ctx.obj['nc'].delete("dhcpoptions/%s" %option['ID'])
+                ctx.obj['nc'].delete("dhcpoptions/%s" % option['ID'])
     else:
         encoded_route = encode_route(new_route_list)
         params = {}
@@ -276,7 +286,8 @@ def dhcp_route_delete(ctx, subnet, mask, gateway, **ids):
         params['length'] = hex(len(encoded_route)/2)[2:].zfill(2)
         for option in result:
             if option['type'] == '79' or option['type'] == 'f9':
-                ctx.obj['nc'].put("dhcpoptions/%s" %option['ID'], params)
+                ctx.obj['nc'].put("dhcpoptions/%s" % option['ID'], params)
+
 
 @vsdcli.command(name='dhcp-gateway-show')
 @click.option('--vminterface-id', metavar='<id>')
@@ -286,13 +297,15 @@ def dhcp_route_delete(ctx, subnet, mask, gateway, **ids):
 @click.option('--subnet-id', metavar='<id>')
 @click.option('--l2domain-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
-              help='Filter for type, length, value, lastUpdatedDate, creationDate, externalID')
+              help='Filter for type, length, value, lastUpdatedDate,'
+                   ' creationDate, externalID')
 @click.pass_context
 def dhcp_gateway_show(ctx, filter, **ids):
-    """Show gateway in dhcp option for a given vminterface, hostinterface, hostinterface,
-bridgeinterface, sharednetworkresource, subnet, l2domain"""
+    """Show gateway in dhcp option for a given vminterface, hostinterface,
+       hostinterface, bridgeinterface, sharednetworkresource, subnet, l2domain
+    """
     id_type, id = check_id(**ids)
-    request = "%ss/%s/dhcpoptions" %(id_type, id)
+    request = "%ss/%s/dhcpoptions" % (id_type, id)
     result = ctx.obj['nc'].get(request, filter=filter)
 
     gateway = 'None'

@@ -7,14 +7,23 @@ def license_list(ctx):
     """Show all license within the VSD"""
     from datetime import datetime
     result = ctx.obj['nc'].get("licenses")
-    table=PrettyTable(["License id", "Compagny", "Max NICs", "Max VMs", "Version", "Expiration"])
+    table = PrettyTable(["License id",
+                         "Compagny",
+                         "Max NICs",
+                         "Max VMs",
+                         "Version",
+                         "Expiration"])
     for line in result:
-        table.add_row( [ line['ID'],
-                          line['company'],
-                          line['allowedNICsCount'],
-                          line['allowedVMsCount'],
-                          line['productVersion'] + 'R' + str(line['majorRelease']),
-                          datetime.fromtimestamp( line['expirationDate']/1000 ).strftime('%Y-%m-%d %H:%M:%S') ] )
+        version = line['productVersion'] + 'R' + str(line['majorRelease']),
+        table.add_row([line['ID'],
+                       line['company'],
+                       line['allowedNICsCount'],
+                       line['allowedVMsCount'],
+                       line['productVersion'] + 'R' + str(
+                           line['majorRelease']),
+                       datetime.fromtimestamp(
+                           line['expirationDate'] /
+                           1000).strftime('%Y-%m-%d %H:%M:%S')])
     print table
 
 
@@ -24,8 +33,8 @@ def license_list(ctx):
 @click.pass_context
 def license_show(ctx, license_id, verbose):
     """Show license detail for a given license id"""
-    result = ctx.obj['nc'].get("licenses/%s" %license_id)[0]
-    print_object( result, exclude=['license'], only=ctx.obj['show_only'] )
+    result = ctx.obj['nc'].get("licenses/%s" % license_id)[0]
+    print_object(result, exclude=['license'], only=ctx.obj['show_only'])
     if verbose >= 1:
         print "License: " + result['license']
 
@@ -35,8 +44,8 @@ def license_show(ctx, license_id, verbose):
 @click.pass_context
 def license_create(ctx, license):
     """Add a license to the VSD"""
-    result = ctx.obj['nc'].post("licenses" , { "license": license })[0]
-    print_object( result, exclude=['license'], only=ctx.obj['show_only'] )
+    result = ctx.obj['nc'].post("licenses", {"license": license})[0]
+    print_object(result, exclude=['license'], only=ctx.obj['show_only'])
 
 
 @vsdcli.command(name='license-delete')
@@ -45,4 +54,4 @@ def license_create(ctx, license):
 @click.pass_context
 def license_delete(ctx, license_id):
     """Delete a given license"""
-    ctx.obj['nc'].delete("licenses/%s" %license_id)
+    ctx.obj['nc'].delete("licenses/%s" % license_id)
