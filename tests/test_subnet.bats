@@ -20,6 +20,11 @@ load helpers
 source common.bash
 
 
+@test "Pep8: vsd_subnet.py" {
+    command pep8 --first ../open_vsdcli/vsd_subnet.py
+}
+
+
 @test "Subnet: create without missing element" {
     run vsd subnet-create --zone-id 255d9673-7281-43c4-be57-fdec677f6e07 --address 192.168.0.0 --netmask 255.255.255.0
     assert_fail

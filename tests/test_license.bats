@@ -20,6 +20,11 @@ load helpers
 source common.bash
 
 
+@test "Pep8: vsd_license.py" {
+    command pep8 --first ../open_vsdcli/vsd_license.py
+}
+
+
 @test "License: create" {
     run vsd license-create 12Z1223E23E23E23E23E23OMEX2KEOJ3EPOJ2A3EPXJP34RJC4P5IOJVPOIYJECEOP4XJPRO4JC5SRVDCOTJQXZQJ4PCJT5P
     assert_success

@@ -20,6 +20,11 @@ load helpers
 source common.bash
 
 
+@test "Pep8: vsd_domain.py" {
+    command pep8 --first ../open_vsdcli/vsd_domain.py
+}
+
+
 @test "Domain template: create" {
     run vsd domaintemplate-create DomainTemplate-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
     assert_success

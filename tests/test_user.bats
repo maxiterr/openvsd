@@ -20,6 +20,11 @@ load helpers
 source common.bash
 
 
+@test "Pep8: vsd_user.py" {
+    command pep8 --first ../open_vsdcli/vsd_user.py
+}
+
+
 @test "User: create with missing element" {
     run vsd user-create --firstname john --lastname doe --email john.doe@nomail.com --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail

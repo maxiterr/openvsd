@@ -20,6 +20,11 @@ load helpers
 source common.bash
 
 
+@test "Pep8: vsd_dhcp.py" {
+    command pep8 --first ../open_vsdcli/vsd_dhcp.py
+}
+
+
 @test "DHCP option: add with missing element" {
     # Miss subnet-id
     run vsd dhcp-option-add --value 18c0a80ac0a80001 --type 79 --length 08

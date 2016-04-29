@@ -20,6 +20,23 @@ load helpers
 source common.bash
 
 
+@test "Pep8: vsdcli.py" {
+    command pep8 --first ../open_vsdcli/vsdcli.py
+}
+
+
+@test "Pep8: vsd_client.py" {
+    command pep8 --first ../open_vsdcli/vsd_client.py
+}
+
+
+@test "Pep8: vsd_common.py" {
+    command pep8 --first ../open_vsdcli/vsd_common.py
+}
+
+
+
+
 @test "VSD client: is available" {
     command -v vsd
 }

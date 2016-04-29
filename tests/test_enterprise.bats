@@ -20,6 +20,11 @@ load helpers
 source common.bash
 
 
+@test "Pep8: vsd_enterprise.py" {
+    command pep8 --first ../open_vsdcli/vsd_enterprise.py
+}
+
+
 @test "Enterprise: list" {
     run vsd enterprise-list
     assert_success
