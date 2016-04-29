@@ -35,8 +35,6 @@ source common.bash
 }
 
 
-
-
 @test "VSD client: is available" {
     command -v vsd
 }
@@ -121,6 +119,15 @@ source common.bash
     run vsd --vsd-username bad-user me-show
     assert_fail
     assert_line_contains 0 "Error: Athentication failed. Please verify your credentials."
+}
+
+
+@test "VSD client: convert date to human readable format" {
+    run vsd me-show
+    assert_success
+    assert_output_contains_in_table DateDecodeDate '2016-07-25 12:00:00 UTC'
+    assert_output_contains_in_table DateNotDecode 1469448000000
+    assert_output_contains_in_table ExpiryDecodeExpiry '2016-07-25 12:00:00 UTC'
 }
 
 
