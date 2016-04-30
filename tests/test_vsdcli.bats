@@ -54,6 +54,16 @@ source common.bash
 }
 
 
+@test "VSD client: print creds example" {
+    run vsd --creds
+    assert_success
+    assert_output_contains "export VSD_USERNAME"
+    assert_output_contains "export VSD_PASSWORD"
+    assert_output_contains "export VSD_ORGANIZATION"
+    assert_output_contains "export VSD_URL"
+}
+
+
 @test "VSD client: request bag object" {
     run vsd enterprise-show bad-object
     assert_fail
