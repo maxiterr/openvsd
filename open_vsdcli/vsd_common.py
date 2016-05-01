@@ -15,17 +15,28 @@ def print_object(obj, only=None, exclude=[]):
         return row_value
 
     def _print_table(obj, exclude):
+        from time import gmtime
+        from time import strftime
         table = PrettyTable(["Field", "Value"])
         table.align["Field"] = "l"
 
         for key in obj.keys():
             if key not in exclude:
                 if type(obj[key]) is list:
-                    table.add_row([key, _format_multiple_values(obj[key])])
+                    table.add_row([
+                        key,
+                        _format_multiple_values(obj[key])
+                    ])
                 else:
-                    table.add_row([key, obj[key]])
+                    if key.endswith(('Date', 'Expiry')):
+                        value = strftime(
+                            "%Y-%m-%d %H:%M:%S UTC",
+                            gmtime(float(obj[key])/1000)
+                        )
+                    else:
+                        value = obj[key]
+                    table.add_row([key, value])
         print table
-
     if only:
         if only in obj:
             print obj[only]

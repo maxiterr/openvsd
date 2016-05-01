@@ -112,11 +112,16 @@ def filter_objets(obj_name, filter):
 def me_show():
     if request.headers.get('Authorization') != "XREST dGVzdDp0ZXN0":
         return make_response("<html><head><title>JBoss - Error report</head></html>", '401')
-    reply = [{'firstName': 'csproot',
-              'enterpriseName': 'CSP',
-              'APIKey':'02a99c64-a09a-46d7',
-              'APIKeyExpiry': (int(epoch())+100)*1000,
-              'enterpriseID': 'fc3a351e-87dc-46a4-bcf5-8c4bb204bd46'}]
+    reply = [{
+        'firstName': 'csproot',
+        'enterpriseName': 'CSP',
+        'APIKey':'02a99c64-a09a-46d7',
+        'APIKeyExpiry': (int(epoch()) + 100) * 1000,
+        'enterpriseID': 'fc3a351e-87dc-46a4-bcf5-8c4bb204bd46',
+        'DateDecodeDate': '1469448000000',
+        'DateNotDecode': '1469448000000',
+        'ExpiryDecodeExpiry': '1469448000000'
+    }]
     return json.dumps(reply)
 
 @app.route("/nuage/api/v1_0/enterprises/bad-object", methods=['GET'])
