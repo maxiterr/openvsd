@@ -87,7 +87,19 @@ def netmask_to_length(netmask):
     return str(length)
 
 
+def print_creds(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo('export VSD_USERNAME=<username>')
+    click.echo('export VSD_PASSWORD=<password>')
+    click.echo('export VSD_ORGANIZATION=csp')
+    click.echo('export VSD_URL=https://<host>:<port>/nuage/api/v3_0/')
+    ctx.exit()
+
+
 @click.group()
+@click.option('--creds', is_flag=True, callback=print_creds, is_eager=True,
+              expose_value=False, help='Display creds example')
 @click.option('--vsd-url', metavar='<url>', envvar='VSD_URL', required=True,
               help='VSD url http(s)://hostname:port/nuage/api_v1_0'
                    ' (Env: VSD_URL)')
