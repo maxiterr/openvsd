@@ -30,12 +30,41 @@ else
   echo "Start server => OK"
 fi
 
-echo ""
-echo "Launch bats"
-bats $SCRIPT_PATH/test.bats
-BATS_STATUS=$?
+exit_script() {
+  echo ""
+  echo "Stop mock server"
+  kill $MOCK_PID
+  exit $BATS_STATUS
+}
+
+TEST_LIST="
+vsdcli
+enterprise
+license
+domain
+subnet
+user
+dhcp"
+
+for test in $TEST_LIST; do
+  echo ""
+  echo "Run bats for $test"
+  cd $SCRIPT_PATH
+  bats $SCRIPT_PATH/test_${test}.bats
+  BATS_STATUS=$?
+  if [ $BATS_STATUS -ne 0 ]; then
+    echo ""
+    echo "#############################"
+    echo "#     Test failled !        #"
+    echo "#############################"
+    exit_script
+  fi
+done
 
 echo ""
-echo "Stop mock server"
-kill $MOCK_PID
-exit $BATS_STATUS
+echo "#############################"
+echo "# All tests pass correctly  #"
+echo "#############################"
+
+BATS_STATUS=0
+exit_script
