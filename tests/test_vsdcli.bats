@@ -64,6 +64,13 @@ source common.bash
 }
 
 
+@test "VSD client: print version" {
+    run vsd --version
+    assert_success
+    echo "$output" | grep -e "^[0-9]*\.[0-9]*\.[0-9]*$"
+}
+
+
 @test "VSD client: request bag object" {
     run vsd enterprise-show bad-object
     assert_fail
