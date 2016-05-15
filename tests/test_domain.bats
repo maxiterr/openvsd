@@ -25,6 +25,11 @@ source common.bash
 }
 
 
+@test "VSD mock: reset" {
+    command vsd free-api reset
+}
+
+
 @test "Domain template: create" {
     run vsd domaintemplate-create DomainTemplate-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
     assert_success

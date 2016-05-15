@@ -148,6 +148,12 @@ source common.bash
 }
 
 
+@test "VSD mock: reset" {
+    run curl -sS ${VSD_URL}reset
+    assert_success
+}
+
+
 @test "free-api: use with non-existing verb" {
     run vsd free-api enterprises --verb FALSE
     assert_fail

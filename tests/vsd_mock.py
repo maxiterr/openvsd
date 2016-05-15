@@ -22,66 +22,6 @@ from time import time as epoch
 app = Flask(__name__)
 
 database = {}
-database.update(
-    {
-        'enterprises':  [
-            {
-                'ID': '92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e',
-                'name': 'nulab-1',
-                'description': 'None',
-                'parentType': 'null',
-                'enterpriseProfileID': 'd63701e0-9246-4c7a-9f43-0c66d0fe45e3'
-            },
-            {
-                'ID': '5b2cc2f3-2b86-42ec-892d-edde741b2fd4',
-                'name': 'nulab-2',
-                'description': 'None',
-                'parentType': 'null',
-                'enterpriseProfileID': '3e05994c-0f9b-41d0-84d5-ec083ee89567'
-            }
-        ]
-    }
-)
-database.update(
-    {
-        'messages':  [
-            {
-                'name': 'already exists',
-                'message':  {
-                    'errors':  [
-                        {
-                            'property': 'name',
-                            'descriptions':  [
-                                {
-                                    'title': 'Duplicate object',
-                                    'description': 'Object already exists.'
-                                }
-                            ]
-                        }
-                    ],
-                    'internalErrorCode': 2002
-                }
-            },
-            {
-                'name': 'not found',
-                'message':  {
-                    'errors':  [
-                        {
-                            'property': '',
-                            'descriptions':  [
-                                {
-                                    'title': 'Object not found',
-                                    'description': 'Cannot find object with ID'
-                                }
-                            ]
-                        }
-                    ],
-                    'description': 'Cannot find object with ID'
-                }
-            }
-        ]
-    }
-)
 
 
 def get_object_id(obj_name, key, value):
@@ -106,6 +46,72 @@ def filter_objets(obj_name, filter):
                 ret.append(object)
                 continue
     return ret
+
+
+@app.route("/nuage/api/v1_0/reset", methods=['GET'])
+def reset():
+    database.clear()
+    database.update(
+        {
+            'enterprises':  [
+                {
+                    'ID': '92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e',
+                    'name': 'nulab-1',
+                    'description': 'None',
+                    'parentType': 'null',
+                    'enterpriseProfileID': 'd63701e0-9246-4c7a-9f43-0c66d0fe45e3'
+                },
+                {
+                    'ID': '5b2cc2f3-2b86-42ec-892d-edde741b2fd4',
+                    'name': 'nulab-2',
+                    'description': 'None',
+                    'parentType': 'null',
+                    'enterpriseProfileID': '3e05994c-0f9b-41d0-84d5-ec083ee89567'
+                }
+            ]
+        }
+    )
+    database.update(
+        {
+            'messages':  [
+                {
+                    'name': 'already exists',
+                    'message':  {
+                        'errors':  [
+                            {
+                                'property': 'name',
+                                'descriptions':  [
+                                    {
+                                        'title': 'Duplicate object',
+                                        'description': 'Object already exists.'
+                                    }
+                                ]
+                            }
+                        ],
+                        'internalErrorCode': 2002
+                    }
+                },
+                {
+                    'name': 'not found',
+                    'message':  {
+                        'errors':  [
+                            {
+                                'property': '',
+                                'descriptions':  [
+                                    {
+                                        'title': 'Object not found',
+                                        'description': 'Cannot find object with ID'
+                                    }
+                                ]
+                            }
+                        ],
+                        'description': 'Cannot find object with ID'
+                    }
+                }
+            ]
+        }
+    )
+    return make_response('{}', '200')
 
 
 @app.route("/nuage/api/v1_0/me", methods=['GET'])
