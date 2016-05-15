@@ -97,9 +97,20 @@ def print_creds(ctx, param, value):
     ctx.exit()
 
 
+def print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    import pbr.version
+    version_info = pbr.version.VersionInfo('open-vsdcli')
+    click.echo(version_info.version_string())
+    ctx.exit()
+
+
 @click.group()
 @click.option('--creds', is_flag=True, callback=print_creds, is_eager=True,
               expose_value=False, help='Display creds example')
+@click.option('--version', is_flag=True, callback=print_version, is_eager=True,
+              expose_value=False, help='Display version and exit')
 @click.option('--vsd-url', metavar='<url>', envvar='VSD_URL', required=True,
               help='VSD url http(s)://hostname:port/nuage/api_v1_0'
                    ' (Env: VSD_URL)')
