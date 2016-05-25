@@ -1,4 +1,4 @@
 click
 prettytable
-requests
+requests>=2.4.0
 pbr
