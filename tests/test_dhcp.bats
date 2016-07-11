@@ -25,6 +25,12 @@ source common.bash
 }
 
 
+@test "VSD mock: reset" {
+    command vsd free-api reset
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/subnets --verb POST --key-value name:Subnet
+}
+
+
 @test "DHCP option: add with missing element" {
     # Miss subnet-id
     run vsd dhcp-option-add --value 18c0a80ac0a80001 --type 79 --length 08

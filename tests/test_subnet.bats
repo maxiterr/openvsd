@@ -25,6 +25,13 @@ source common.bash
 }
 
 
+@test "VSD mock: reset" {
+    command vsd free-api reset
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/zones --verb POST --key-value name:Zone
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/domains --verb POST --key-value name:Domain
+}
+
+
 @test "Subnet: create without missing element" {
     run vsd subnet-create --zone-id 255d9673-7281-43c4-be57-fdec677f6e07 --address 192.168.0.0 --netmask 255.255.255.0
     assert_fail

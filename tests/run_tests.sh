@@ -46,7 +46,7 @@ subnet
 user
 dhcp"
 
-for test in $TEST_LIST; do
+for test in $(echo "$TEST_LIST" | grep "$1"); do
   echo ""
   echo "Run bats for $test"
   cd $SCRIPT_PATH

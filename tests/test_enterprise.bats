@@ -25,6 +25,11 @@ source common.bash
 }
 
 
+@test "VSD mock: reset" {
+    command vsd free-api reset
+}
+
+
 @test "Enterprise: list" {
     run vsd enterprise-list
     assert_success
