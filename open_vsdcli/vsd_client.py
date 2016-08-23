@@ -103,12 +103,13 @@ class VSDConnection(object):
         if filter:
             self.headers['X-Nuage-Filter'] = filter
         resp = []
-        self.headers['X-Nuage-Page'] = 0
+        X_Nuage_Page = 0
         while True:
+            self.headers['X-Nuage-Page'] = str(X_Nuage_Page)
             r = self._do_request('GET', self.base_url + url,
                                  headers=self.headers)
             resp += self._response(r)
-            self.headers['X-Nuage-Page'] += 1
+            X_Nuage_Page += 1
             if _next_page_is_invalid(r.headers):
                 break
         return resp
