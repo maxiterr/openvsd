@@ -28,7 +28,8 @@ def print_object(obj, only=None, exclude=[]):
                         _format_multiple_values(obj[key])
                     ])
                 else:
-                    if key.endswith(('Date', 'Expiry')):
+                    if key.endswith(('Date', 'Expiry')) and \
+                       not obj[key] == 'null':
                         value = strftime(
                             "%Y-%m-%d %H:%M:%S UTC",
                             gmtime(float(obj[key])/1000)

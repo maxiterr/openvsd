@@ -116,7 +116,13 @@ def reset():
 
 @app.route("/nuage/api/v1_0/me", methods=['GET'])
 def me_show():
-    if request.headers.get('Authorization') != "XREST dGVzdDp0ZXN0":
+    xrest = [
+        "XREST dGVzdDp0ZXN0",         # test/test
+        "XREST ZGF0ZTp0ZXN0",         # date/test
+        "XREST bnVsbGRhdGU6dGVzdA=="  # nulldate/test
+    ]
+    auth = request.headers.get('Authorization')
+    if not auth in xrest:
         return make_response("<html><head><title>JBoss - Error report</head></html>", '401')
     reply = [{
         'firstName': 'csproot',
@@ -124,10 +130,15 @@ def me_show():
         'APIKey':'02a99c64-a09a-46d7',
         'APIKeyExpiry': (int(epoch()) + 100) * 1000,
         'enterpriseID': 'fc3a351e-87dc-46a4-bcf5-8c4bb204bd46',
-        'DateDecodeDate': '1469448000000',
-        'DateNotDecode': '1469448000000',
-        'ExpiryDecodeExpiry': '1469448000000'
     }]
+    if auth == "XREST ZGF0ZTp0ZXN0":
+        reply[0]['DateDecodeDate'] = '1469448000000'
+        reply[0]['DateNotDecode'] = '1469448000000'
+        reply[0]['ExpiryDecodeExpiry'] = '1469448000000'
+
+    if auth == "XREST bnVsbGRhdGU6dGVzdA==":
+        reply[0]['DateDecodeDate'] = 'null'
+            
     return json.dumps(reply)
 
 @app.route("/nuage/api/v1_0/enterprises/bad-object", methods=['GET'])

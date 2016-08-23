@@ -140,11 +140,20 @@ source common.bash
 
 
 @test "VSD client: convert date to human readable format" {
+    export VSD_USERNAME=date
     run vsd me-show
     assert_success
     assert_output_contains_in_table DateDecodeDate '2016-07-25 12:00:00 UTC'
     assert_output_contains_in_table DateNotDecode 1469448000000
     assert_output_contains_in_table ExpiryDecodeExpiry '2016-07-25 12:00:00 UTC'
+}
+
+
+@test "VSD client: do not fail if date is null" {
+    export VSD_USERNAME=nulldate
+    run vsd me-show
+    assert_success
+    assert_output_contains_in_table DateDecodeDate 'null'
 }
 
 
