@@ -204,3 +204,92 @@ def bridgeinterface_list(ctx, filter, **ids):
                        line['name'],
                        line['VPortID']])
     print table
+
+
+@vsdcli.command(name='gatewayredundancygroup-list')
+@click.option('--enterprise-id', metavar='<ID>')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for vtep, name, description, personality, '
+                   'ID, externalID')
+@click.pass_context
+def gatewayredundancygroup_list(ctx, filter, enterprise_id):
+    """list all gateway redundant groups"""
+    if enterprise_id:
+        url_request = "enterprises/%s/redundancygroups" % enterprise_id
+    else:
+        url_request = "redundancygroups"
+    result = ctx.obj['nc'].get(url_request, filter=filter)
+    table = PrettyTable(["ID",
+                         "Redundant Gateway Status",
+                         "Name",
+                         "Description",
+                         "Personality",
+                         "gatewayPeer1Name",
+                         "gatewayPeer2Name"])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['redundantGatewayStatus'],
+                       line['name'],
+                       line['description'],
+                       line['personality'],
+                       line['gatewayPeer1Name'],
+                       line['gatewayPeer2Name']])
+    print table
+
+
+@vsdcli.command(name='gatewayredundancygroup-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
+@click.option('--gateway-peer1-id', metavar='<gateway peer1 ID>',
+              required=True)
+@click.option('--gateway-peer2-id', metavar='<gateway peer2 ID>',
+              required=True)
+@click.pass_context
+def gatewayredundancygroup_create(ctx, name, enterprise_id,
+                                  gateway_peer1_id,
+                                  gateway_peer2_id):
+    """Create a gateway redundant group"""
+    params = {'name':           name,
+              'gatewayPeer1ID': gateway_peer1_id,
+              'gatewayPeer2ID': gateway_peer2_id}
+    result = ctx.obj['nc'].post("enterprises/%s/redundancygroups" %
+                                enterprise_id, params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='gatewayredundancygroup-show')
+@click.argument('gatewayredundancygroup-id',
+                 metavar='<gatewayredundancygroup ID>', required=True)
+@click.pass_context
+def gatewayredundancygroup_show(ctx, gatewayredundancygroup_id):
+    """Show information for a given gateway redundant group id"""
+    result = ctx.obj['nc'].get("redundancygroups/%s" %
+                               gatewayredundancygroup_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='gatewayredundancygroup-delete')
+@click.argument('gatewayredundancygroup-id',
+                metavar='<gatewayredundancygroup id>', required=True)
+@click.pass_context
+def gatewayredundancygroup_delete(ctx, gatewayredundancygroup_id):
+    """Delete a given gateway redundant group"""
+    ctx.obj['nc'].delete("redundancygroups/%s" % gatewayredundancygroup_id)
+
+
+@vsdcli.command(name='gatewayredundancygroup-update')
+@click.argument('gatewayredundancygroup-id',
+                metavar='<gatewayredundancygroup ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def gatewayredundancygroup_update(ctx, gatewayredundancygroup_id, key_value):
+    """Update key/value for a given gateway redundant group"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':', 1)
+        params[key] = value
+    ctx.obj['nc'].put("redundancygroups/%s" % gatewayredundancygroup_id,
+                      params)
+    result = ctx.obj['nc'].get("redundancygroups/%s" %
+                               gatewayredundancygroup_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
