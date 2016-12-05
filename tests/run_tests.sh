@@ -44,7 +44,9 @@ license
 domain
 subnet
 user
-dhcp"
+dhcp
+gateway
+redundancygroups"
 
 for test in $(echo "$TEST_LIST" | grep "$1"); do
   echo ""

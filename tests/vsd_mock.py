@@ -107,7 +107,24 @@ def reset():
                         ],
                         'description': 'Cannot find object with ID'
                     }
-                }
+                },
+                {
+                    'name': 'already in use',
+                    'message':  {
+                        'errors':  [
+                            {
+                                'property': '',
+                                'descriptions':  [
+                                    {
+                                        'title': 'Object already in use',
+                                        'description': 'Gateway x.x.x.x is already part of another Redundancy group'
+                                    }
+                                ]
+                            }
+                        ],
+                        'description': 'Gateway x.x.x.x is already part of another Redundancy group'
+                    }
+                },
             ]
         }
     )
@@ -127,7 +144,7 @@ def me_show():
     reply = [{
         'firstName': 'csproot',
         'enterpriseName': 'CSP',
-        'APIKey':'02a99c64-a09a-46d7',
+        'APIKey': '02a99c64-a09a-46d7',
         'APIKeyExpiry': (int(epoch()) + 100) * 1000,
         'enterpriseID': 'fc3a351e-87dc-46a4-bcf5-8c4bb204bd46',
     }]
@@ -138,8 +155,9 @@ def me_show():
 
     if auth == "XREST bnVsbGRhdGU6dGVzdA==":
         reply[0]['DateDecodeDate'] = 'null'
-            
+
     return json.dumps(reply)
+
 
 @app.route("/nuage/api/v1_0/enterprises/bad-object", methods=['GET'])
 def bag_object():
@@ -192,15 +210,93 @@ def update_group_user_list(obj_id):
     return '{}'
 
 
+def increment_id(id):
+    """Increment each byte by one"""
+    """111111 becomes 22222 and so on"""
+    c = ord(id[0]) + 1
+    new = chr(c) * 8 + '-' + chr(c) * 4 + '-' + chr(c) * 4 + '-' + chr(c) * 12
+    return new
+
+
+@app.route("/nuage/api/v1_0/gateways", methods=['POST'])
+def gateway_create():
+    data_update = json.loads(request.data)
+    if 'gateways' not in database:
+        database.update({'gateways': []})
+    data_src = get_object_id('gateways', 'systemID', data_update['systemID'])
+    if data_src != {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'already exists')['message']), '409')
+
+    id = '0'
+    for object in database['gateways']:
+        if (object['ID'][0] > id):
+            id = object['ID'][0]
+
+    id = increment_id(id)
+    new = {'ID': id,
+           'systemID': '9.9.9.9',
+           'name': 'gateway-unknown',
+           'description': 'None',
+           'pending': 'False',
+           'redundancyGroupID': 'None',
+           'personality': 'VRSG'}
+    new.update(data_update)
+    database['gateways'].append(new)
+
+    return json.dumps([get_object_id('gateways', 'ID', id)])
+
+
+@app.route("/nuage/api/v1_0/enterprises/<enterprise_id>/redundancygroups", methods=['POST'])
+def gatewayredundantgroup_create(enterprise_id):
+    data_update = json.loads(request.data)
+    if 'redundancygroups' not in database:
+        database.update({'redundancygroups': []})
+
+    id = get_object_id('redundancygroups', 'gatewayPeer1ID',
+                       data_update['gatewayPeer1ID'])
+    if id != {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'already in use')['message']), '409')
+
+    id = get_object_id('redundancygroups', 'gatewayPeer2ID',
+                       data_update['gatewayPeer2ID'])
+    if id != {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'already in use')['message']), '409')
+
+    id = '0'
+    for object in database['gateways']:
+        if (object['ID'][0] > id):
+            id = object['ID'][0]
+
+    id = increment_id(id)
+    new = {'ID': id,
+           'name': 'gw-group-unknown',
+           'description': 'None',
+           'entityScope': 'ENTERPRISE',
+           'enterpriseID': enterprise_id,
+           'gatewayPeer1ID': '11111111-1111-1111-111111111111',
+           'gatewayPeer2ID': '22222222-2222-2222-222222222222',
+           'gatewayPeer1Name': 'gateway-1',
+           'gatewayPeer2Name': 'gateway-2',
+           'redundantGatewayStatus': 'SUCCESS',
+           'personality': 'VRSG'}
+
+    new.update(data_update)
+    database['redundancygroups'].append(new)
+    return json.dumps([get_object_id('redundancygroups', 'ID', id)])
+
+
 @app.route("/nuage/api/v1_0/licenses", methods=['POST'])
 def license_create():
     data_update = json.loads(request.data)
     if 'licenses' not in database:
-        database.update({'licenses':[]})
+        database.update({'licenses': []})
     data_src = get_object_id('licenses', 'license', data_update['license'])
     if data_src != {}:
         return make_response(json.dumps(
-        get_object_id('messages', 'name', 'already exists')['message']), '409')
+            get_object_id('messages', 'name', 'already exists')['message']), '409')
     new = {'license': data_update['license'],
            'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
            'description': 'None',
@@ -251,7 +347,7 @@ def object_create_with_parent(parent_name, parent_id, obj_name):
         'description': 'None'
     })
     if obj_name not in database:
-        database.update({obj_name:[]})
+        database.update({obj_name: []})
     database[obj_name].append(data_update)
     return json.dumps([get_object_id(obj_name, 'ID', uuid)])
 

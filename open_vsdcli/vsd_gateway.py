@@ -1,6 +1,41 @@
 from vsd_common import *
 
 
+@vsdcli.command(name='gateway-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--system-id', metavar='<system ID>', required=True)
+@click.option('--personality', metavar='<personality>',
+              type=click.Choice(['VSG',
+                                 'VSA',
+                                 'VRSG',
+                                 'DC7X50',
+                                 'NSG',
+                                 'HARDWARE_VTEP',
+                                 'OTHER']),
+              required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>')
+@click.pass_context
+def gateway_create(ctx, name, system_id, personality, enterprise_id):
+    """Add a gateway to the VSD"""
+    params = {'systemID':    system_id,
+              'name':        name,
+              'personality': personality}
+    if enterprise_id:
+        url_request = "enterprises/%s/gateways" % enterprise_id
+    else:
+        url_request = "gateways"
+    result = ctx.obj['nc'].post(url_request, params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='gateway-delete')
+@click.argument('gateway-id', metavar='<gateway ID>', required=True)
+@click.pass_context
+def gateway_delete(ctx, gateway_id):
+    """Delete a given gateway"""
+    ctx.obj['nc'].delete("gateways/%s" % gateway_id)
+
+
 @vsdcli.command(name='gateway-list')
 @click.option('--enterprise-id', metavar='<ID>')
 @click.option('--redundancygroup-id', metavar='<ID>')
@@ -8,7 +43,7 @@ from vsd_common import *
               help='Filter for pending, systemID, name, description, '
                    'personality, lastUpdatedDate, creationDate, externalID')
 @click.pass_context
-def gateway_list_list(ctx, enterprise_id, redundancygroup_id, filter):
+def gateway_list(ctx, enterprise_id, redundancygroup_id, filter):
     """list gateways for a given enterprise or group id"""
     if enterprise_id:
         url_request = "enterprises/%s/gateways" % enterprise_id
@@ -259,7 +294,7 @@ def gatewayredundancygroup_create(ctx, name, enterprise_id,
 
 @vsdcli.command(name='gatewayredundancygroup-show')
 @click.argument('gatewayredundancygroup-id',
-                 metavar='<gatewayredundancygroup ID>', required=True)
+                metavar='<gatewayredundancygroup ID>', required=True)
 @click.pass_context
 def gatewayredundancygroup_show(ctx, gatewayredundancygroup_id):
     """Show information for a given gateway redundant group id"""
