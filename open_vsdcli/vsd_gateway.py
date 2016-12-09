@@ -274,7 +274,7 @@ def gatewayredundancygroup_list(ctx, filter, enterprise_id):
 
 @vsdcli.command(name='gatewayredundancygroup-create')
 @click.argument('name', metavar='<name>', required=True)
-@click.option('--enterprise-id', metavar='<enterprise ID>', required=True)
+@click.option('--enterprise-id', metavar='<enterprise ID>')
 @click.option('--gateway-peer1-id', metavar='<gateway peer1 ID>',
               required=True)
 @click.option('--gateway-peer2-id', metavar='<gateway peer2 ID>',
@@ -287,8 +287,12 @@ def gatewayredundancygroup_create(ctx, name, enterprise_id,
     params = {'name':           name,
               'gatewayPeer1ID': gateway_peer1_id,
               'gatewayPeer2ID': gateway_peer2_id}
-    result = ctx.obj['nc'].post("enterprises/%s/redundancygroups" %
-                                enterprise_id, params)[0]
+    if enterprise_id:
+        url_request = "enterprises/%s/redundancygroups" % enterprise_id
+    else:
+        url_request = "redundancygroups"
+
+    result = ctx.obj['nc'].post(url_request, params)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
