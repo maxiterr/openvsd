@@ -44,6 +44,36 @@ source common.bash
     assert_output_contains_in_table systemID 2.2.2.2
     assert_output_contains_in_table ID 22222222-2222-2222-222222222222
 
+    run vsd gatewayredundancygroup-create gw-group \
+                       --gateway-peer1-id 11111111-1111-1111-111111111111 \
+                       --gateway-peer2-id 22222222-2222-2222-222222222222
+    assert_success
+    assert_output_contains_in_table name gw-group
+    assert_output_contains_in_table gatewayPeer1ID 11111111-1111-1111-111111111111
+    assert_output_contains_in_table gatewayPeer2ID 22222222-2222-2222-222222222222
+    assert_output_contains_in_table redundantGatewayStatus SUCCESS
+    assert_output_not_contains_in_table name gw-group-unknown
+}
+
+
+@test "VSD mock: reset" {
+    command vsd free-api reset
+}
+
+
+@test "Gateway redundant group: create (with enterprise-id)" {
+    run vsd gateway-create gateway-1 --system-id 1.1.1.1 --personality VRSG
+    assert_success
+    assert_output_contains_in_table name gateway-1
+    assert_output_contains_in_table systemID 1.1.1.1
+    assert_output_contains_in_table ID 11111111-1111-1111-111111111111
+
+    run vsd gateway-create gateway-2 --system-id 2.2.2.2 --personality VRSG
+    assert_success
+    assert_output_contains_in_table name gateway-2
+    assert_output_contains_in_table systemID 2.2.2.2
+    assert_output_contains_in_table ID 22222222-2222-2222-222222222222
+
     run vsd gatewayredundancygroup-create gw-group --enterprise-id fc3a351e-87dc-46a4-bcf5-8c4bb204bd46 \
                                                    --gateway-peer1-id 11111111-1111-1111-111111111111 \
                                                    --gateway-peer2-id 22222222-2222-2222-222222222222

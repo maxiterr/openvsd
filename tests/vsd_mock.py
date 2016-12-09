@@ -247,8 +247,49 @@ def gateway_create():
     return json.dumps([get_object_id('gateways', 'ID', id)])
 
 
+@app.route("/nuage/api/v1_0/redundancygroups", methods=['POST'])
+def gatewayredundantgroup_create():
+    data_update = json.loads(request.data)
+    if 'redundancygroups' not in database:
+        database.update({'redundancygroups': []})
+
+    id = get_object_id('redundancygroups', 'gatewayPeer1ID',
+                       data_update['gatewayPeer1ID'])
+    if id != {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'already in use')['message']), '409')
+
+    id = get_object_id('redundancygroups', 'gatewayPeer2ID',
+                       data_update['gatewayPeer2ID'])
+    if id != {}:
+        return make_response(json.dumps(
+            get_object_id('messages', 'name', 'already in use')['message']), '409')
+
+    id = '0'
+    for object in database['gateways']:
+        if (object['ID'][0] > id):
+            id = object['ID'][0]
+
+    id = increment_id(id)
+    new = {'ID': id,
+           'name': 'gw-group-unknown',
+           'description': 'None',
+           'entityScope': 'ENTERPRISE',
+           'enterpriseID': '76046673-d0ea-4a67-b6af-2829952f0812',
+           'gatewayPeer1ID': '11111111-1111-1111-111111111111',
+           'gatewayPeer2ID': '22222222-2222-2222-222222222222',
+           'gatewayPeer1Name': 'gateway-1',
+           'gatewayPeer2Name': 'gateway-2',
+           'redundantGatewayStatus': 'SUCCESS',
+           'personality': 'VRSG'}
+
+    new.update(data_update)
+    database['redundancygroups'].append(new)
+    return json.dumps([get_object_id('redundancygroups', 'ID', id)])
+
+
 @app.route("/nuage/api/v1_0/enterprises/<enterprise_id>/redundancygroups", methods=['POST'])
-def gatewayredundantgroup_create(enterprise_id):
+def gatewayredundantgroup_create_with_enterprise_id(enterprise_id):
     data_update = json.loads(request.data)
     if 'redundancygroups' not in database:
         database.update({'redundancygroups': []})
