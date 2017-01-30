@@ -203,9 +203,9 @@ def l2domain_create(ctx, name, enterprise_id, template_id, rt, rd):
 @vsdcli.command(name='l2domain-delete')
 @click.argument('l2domain-id', metavar='<l2domain ID>', required=True)
 @click.pass_context
-def l2domain_delete(ctx, domain_id):
+def l2domain_delete(ctx, l2domain_id):
     """Delete a given l2 domain"""
-    ctx.obj['nc'].delete("l2domains/%s" % domain_id)
+    ctx.obj['nc'].delete("l2domains/%s" % l2domain_id)
 
 
 @vsdcli.command(name='l2domain-update')
