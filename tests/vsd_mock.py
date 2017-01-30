@@ -23,6 +23,7 @@ app = Flask(__name__)
 
 database = {}
 
+base_url="/nuage/api/v3_2/"
 
 def get_object_id(obj_name, key, value):
     if obj_name not in database:
@@ -48,7 +49,7 @@ def filter_objets(obj_name, filter):
     return ret
 
 
-@app.route("/nuage/api/v1_0/reset", methods=['GET'])
+@app.route(base_url + "reset", methods=['GET'])
 def reset():
     database.clear()
     database.update(
@@ -131,7 +132,7 @@ def reset():
     return make_response('{}', '200')
 
 
-@app.route("/nuage/api/v1_0/me", methods=['GET'])
+@app.route(base_url + "me", methods=['GET'])
 def me_show():
     xrest = [
         "XREST dGVzdDp0ZXN0",         # test/test
@@ -159,7 +160,7 @@ def me_show():
     return json.dumps(reply)
 
 
-@app.route("/nuage/api/v1_0/enterprises/bad-object", methods=['GET'])
+@app.route(base_url + "enterprises/bad-object", methods=['GET'])
 def bag_object():
     msg = ("<html><head><title>JBoss Web/7.0.17.Final - Error report</title>"
            " </head><body><h1>HTTP Status 400 - </h1><HR size=\"1\" noshade=\"noshade\">"
@@ -170,13 +171,13 @@ def bag_object():
     make_response(msg, '405')
 
 
-@app.route("/nuage/api/v1_0/<obj_name>", methods=['GET'])
+@app.route(base_url + "<obj_name>", methods=['GET'])
 def object_list(obj_name):
     filter = request.headers.get('X-Nuage-Filter')
     return json.dumps(filter_objets(obj_name, filter))
 
 
-@app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['GET'])
+@app.route(base_url + "<obj_name>/<obj_id>", methods=['GET'])
 def object_show(obj_name, obj_id):
     data_src = get_object_id(obj_name, 'ID', obj_id)
     if data_src == {}:
@@ -185,7 +186,7 @@ def object_show(obj_name, obj_id):
     return json.dumps([get_object_id(obj_name, 'ID', obj_id)])
 
 
-@app.route("/nuage/api/v1_0/<parent_name>/<parent_id>/<obj_name>", methods=['GET'])
+@app.route(base_url + "<parent_name>/<parent_id>/<obj_name>", methods=['GET'])
 def get_object_list_with_parent(parent_name, parent_id, obj_name):
     # Check parent exist but don't check parent own objects
     data_src = get_object_id(parent_name, 'ID', parent_id)
@@ -196,7 +197,7 @@ def get_object_list_with_parent(parent_name, parent_id, obj_name):
     return json.dumps(filter_objets(obj_name, filter))
 
 
-@app.route("/nuage/api/v1_0/groups/<obj_id>/users", methods=['PUT'])
+@app.route(base_url + "groups/<obj_id>/users", methods=['PUT'])
 def update_group_user_list(obj_id):
     # ToDo: Currently the server_mock doesn't do anything while we update
     #       the list of users in the group. If you wan to implement this
@@ -218,7 +219,7 @@ def increment_id(id):
     return new
 
 
-@app.route("/nuage/api/v1_0/gateways", methods=['POST'])
+@app.route(base_url + "gateways", methods=['POST'])
 def gateway_create():
     data_update = json.loads(request.data)
     if 'gateways' not in database:
@@ -247,7 +248,7 @@ def gateway_create():
     return json.dumps([get_object_id('gateways', 'ID', id)])
 
 
-@app.route("/nuage/api/v1_0/redundancygroups", methods=['POST'])
+@app.route(base_url + "redundancygroups", methods=['POST'])
 def gatewayredundantgroup_create():
     data_update = json.loads(request.data)
     if 'redundancygroups' not in database:
@@ -288,7 +289,7 @@ def gatewayredundantgroup_create():
     return json.dumps([get_object_id('redundancygroups', 'ID', id)])
 
 
-@app.route("/nuage/api/v1_0/enterprises/<enterprise_id>/redundancygroups", methods=['POST'])
+@app.route(base_url + "enterprises/<enterprise_id>/redundancygroups", methods=['POST'])
 def gatewayredundantgroup_create_with_enterprise_id(enterprise_id):
     data_update = json.loads(request.data)
     if 'redundancygroups' not in database:
@@ -329,7 +330,7 @@ def gatewayredundantgroup_create_with_enterprise_id(enterprise_id):
     return json.dumps([get_object_id('redundancygroups', 'ID', id)])
 
 
-@app.route("/nuage/api/v1_0/licenses", methods=['POST'])
+@app.route(base_url + "licenses", methods=['POST'])
 def license_create():
     data_update = json.loads(request.data)
     if 'licenses' not in database:
@@ -351,7 +352,7 @@ def license_create():
     return json.dumps([get_object_id('licenses', 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
 
 
-@app.route("/nuage/api/v1_0/<obj_name>", methods=['POST'])
+@app.route(base_url + "<obj_name>", methods=['POST'])
 def object_create(obj_name):
     data_update = json.loads(request.data)
     data_src = get_object_id(obj_name, 'name', data_update['name'])
@@ -365,7 +366,7 @@ def object_create(obj_name):
     return json.dumps([get_object_id(obj_name, 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
 
 
-@app.route("/nuage/api/v1_0/<parent_name>/<parent_id>/<obj_name>", methods=['POST'])
+@app.route(base_url + "<parent_name>/<parent_id>/<obj_name>", methods=['POST'])
 def object_create_with_parent(parent_name, parent_id, obj_name):
     data_update = json.loads(request.data)
     # Check parent exist but don't check parent own objects
@@ -393,7 +394,7 @@ def object_create_with_parent(parent_name, parent_id, obj_name):
     return json.dumps([get_object_id(obj_name, 'ID', uuid)])
 
 
-@app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['PUT'])
+@app.route(base_url + "<obj_name>/<obj_id>", methods=['PUT'])
 def object_update(obj_name, obj_id):
     data_update = json.loads(request.data)
     data_src = get_object_id(obj_name, 'ID', obj_id)
@@ -401,7 +402,7 @@ def object_update(obj_name, obj_id):
     return '{}'
 
 
-@app.route("/nuage/api/v1_0/<obj_name>/<obj_id>", methods=['DELETE'])
+@app.route(base_url + "<obj_name>/<obj_id>", methods=['DELETE'])
 def object_delete(obj_name, obj_id):
     data_src = get_object_id(obj_name, 'ID', obj_id)
     if data_src == {}:

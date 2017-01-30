@@ -94,7 +94,7 @@ def print_creds(ctx, param, value):
     click.echo('export VSD_USERNAME=<username>')
     click.echo('export VSD_PASSWORD=<password>')
     click.echo('export VSD_ORGANIZATION=csp')
-    click.echo('export VSD_URL=https://<host>:<port>/nuage/api/v3_0/')
+    click.echo('export VSD_URL=https://<host>:<port>/nuage/api/v3_2/')
     ctx.exit()
 
 
@@ -113,7 +113,7 @@ def print_version(ctx, param, value):
 @click.option('--version', is_flag=True, callback=print_version, is_eager=True,
               expose_value=False, help='Display version and exit')
 @click.option('--vsd-url', metavar='<url>', envvar='VSD_URL', required=True,
-              help='VSD url http(s)://hostname:port/nuage/api_v1_0'
+              help='VSD url http(s)://hostname:port/nuage/api_v3_2'
                    ' (Env: VSD_URL)')
 @click.option('--vsd-username', metavar='<username>', envvar='VSD_USERNAME',
               required=True,

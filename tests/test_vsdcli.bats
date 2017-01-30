@@ -120,7 +120,7 @@ source common.bash
     [ -f ${APIKey} ]
     run vsd --debug enterprise-list
     assert_success
-    assert_output_not_contains "/nuage/api/v1_0/me"
+    assert_output_not_contains "/nuage/api/v3_2/me"
 }
 
 
@@ -128,7 +128,7 @@ source common.bash
     [ -f ${APIKey} ]
     run vsd --debug --force-auth enterprise-list
     assert_success
-    assert_output_contains "/nuage/api/v1_0/me"
+    assert_output_contains "/nuage/api/v3_2/me"
 }
 
 
