@@ -8,7 +8,6 @@ def license_list(ctx):
     from datetime import datetime
     result = ctx.obj['nc'].get("licenses")
     table = PrettyTable(["License id",
-                         "is Cluster",
                          "Compagny",
                          "Max NICs",
                          "Max VMs",
@@ -17,7 +16,6 @@ def license_list(ctx):
     for line in result:
         version = line['productVersion'] + 'R' + str(line['majorRelease']),
         table.add_row([line['ID'],
-                       line['isClusterLicense'],
                        line['company'],
                        line['allowedNICsCount'],
                        line['allowedVMsCount'],
