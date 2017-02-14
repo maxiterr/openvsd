@@ -340,6 +340,7 @@ def license_create():
             get_object_id('messages', 'name', 'already exists')['message']), '409')
     new = {'license': data_update['license'],
            'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
+           'isClusterLicense': 'True',
            'description': 'None',
            'company': 'Compagny-1',
            'allowedNICsCount': '100',
