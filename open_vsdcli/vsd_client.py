@@ -87,7 +87,7 @@ class VSDConnection(object):
             return []
         return resp.json()
 
-    def get(self, url, filter=None):
+    def get(self, url, filter=None, headers={}):
         def _next_page_is_invalid(headers):
             if ('X-Nuage-PageSize' not in headers or
                     'X-Nuage-Page' not in r.headers or
@@ -106,24 +106,30 @@ class VSDConnection(object):
         X_Nuage_Page = 0
         while True:
             self.headers['X-Nuage-Page'] = str(X_Nuage_Page)
+            h = self.headers.copy()
+            h.update(headers)
             r = self._do_request('GET', self.base_url + url,
-                                 headers=self.headers)
+                                 headers=h)
             resp += self._response(r)
             X_Nuage_Page += 1
             if _next_page_is_invalid(r.headers):
                 break
         return resp
 
-    def post(self, url, params):
+    def post(self, url, params, headers={}):
         self.authenticate()
+        h = self.headers.copy()
+        h.update(headers)
         r = self._do_request('POST', self.base_url + url,
-                             headers=self.headers, params=params)
+                             headers=h, params=params)
         return self._response(r)
 
-    def put(self, url, params):
+    def put(self, url, params, headers={}):
         self.authenticate()
+        h = self.headers.copy()
+        h.update(headers)
         r = self._do_request('PUT', self.base_url + url,
-                             headers=self.headers, params=params)
+                             headers=h, params=params)
         return self._response(r)
 
     def delete(self, url):

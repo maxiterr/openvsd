@@ -169,7 +169,7 @@ def me_show(ctx, verbose):
                                  'DELETE']),
               default='GET',
               help='Default : GET')
-@click.option('--header', metavar='<name:value>',
+@click.option('--header', metavar='<name:value>', multiple=True,
               help='Add header to the request. Can be repeated.')
 @click.option('--key-value', metavar='<key:value>', multiple=True,
               help='Specify body in key/value pair.'
@@ -195,12 +195,17 @@ def free_api(ctx, ressource, verb, header, key_value, body):
         except ValueError:
             raise click.exceptions.UsageError(
                 "Body could not be decoded as JSON")
+    h = {}
+    if header:
+        for kv in header:
+            key, value = kv.split(':', 1)
+            h[key] = value
     if verb == 'GET':
-        result = ctx.obj['nc'].get(ressource)
+        result = ctx.obj['nc'].get(ressource, headers=h)
     elif verb == 'PUT':
-        result = ctx.obj['nc'].put(ressource, params)
+        result = ctx.obj['nc'].put(ressource, params, headers=h)
     elif verb == 'POST':
-        result = ctx.obj['nc'].post(ressource, params)
+        result = ctx.obj['nc'].post(ressource, params, headers=h)
     elif verb == 'DELETE':
         result = ctx.obj['nc'].delete(ressource)
     print json.dumps(result, indent=4)
