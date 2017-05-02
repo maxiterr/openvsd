@@ -332,3 +332,36 @@ def gatewayredundancygroup_update(ctx, gatewayredundancygroup_id, key_value):
     result = ctx.obj['nc'].get("redundancygroups/%s" %
                                gatewayredundancygroup_id)[0]
     print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='gatewayredundantport-list')
+@click.option('--redundancygroup-id', metavar='<ID>', required=True)
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name, physicalName, portType, userMnemonic, '
+                   'useUserMnemonic, description, VLANRange, ID, externalID')
+@click.pass_context
+def gatewayredundantport_list(ctx, filter, redundancygroup_id):
+    """list all redundant port for a given redundancy groups"""
+    url_request = "redundancygroups/%s/vsgredundantports" % redundancygroup_id
+    result = ctx.obj['nc'].get(url_request, filter=filter)
+    table = PrettyTable(["ID",
+                         "Name",
+                         "Description",
+                         "VLAN Range"])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['name'],
+                       line['description'],
+                       line['VLANRange']])
+    print table
+
+
+@vsdcli.command(name='gatewayredundantport-show')
+@click.argument('gatewayredundantport-id',
+                metavar='<gatewayredundancygroup ID>', required=True)
+@click.pass_context
+def gatewayredundantport_show(ctx, gatewayredundantport_id):
+    """Show information for a given gateway redundant port id"""
+    result = ctx.obj['nc'].get("vsgredundantports/%s" %
+                               gatewayredundantport_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
