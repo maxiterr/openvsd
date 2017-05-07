@@ -88,6 +88,21 @@ def vm_create(ctx, name, uuid, vport_id, mac, ipaddress):
                  only=ctx.obj['show_only'])
 
 
+@vsdcli.command(name='vm-update')
+@click.argument('vm-id', metavar='<vm ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def vm_update(ctx, vm_id, key_value):
+    """Update key/value for a given vm"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':', 1)
+        params[key] = value
+    ctx.obj['nc'].put("vms/%s" % vm_id, params)
+    result = ctx.obj['nc'].get("vms/%s" % vm_id)[0]
+    print_object(result, exclude=['interfaces', 'resyncInfo'],
+                 only=ctx.obj['show_only'])
+
 
 @vsdcli.command(name='vminterface-list')
 @click.option('--subnet-id', metavar='<id>')
