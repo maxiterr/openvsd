@@ -25,6 +25,7 @@ from vsd_vm import *
 from vsd_vport import *
 from vsd_policy import *
 from vsd_dhcp import *
+from vsd_metadata import *
 
 
 def main():
