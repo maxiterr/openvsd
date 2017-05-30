@@ -167,3 +167,79 @@ def metadata_remove_tag(ctx, metadata_id, is_global, tag):
 def metadata_delete(ctx, metadata_id):
     """Delete a given metadata"""
     ctx.obj['nc'].delete("metadatas/%s" % metadata_id)
+
+
+@vsdcli.command(name='metadatatag-list')
+@click.option('--enterprise-id', metavar='<ID>')
+@click.option('--metadata-id', metavar='<ID>')
+@click.option('--filter', metavar='<filter>',
+              help="Filter for name, description, associatedExternalServiceID"
+                   ", autoCreated, ID, externalID")
+@click.pass_context
+def metadatatag_list(ctx, enterprise_id, metadata_id, filter):
+    """Show all metadata tags for a given enterprise or metadata.
+       If nor enterprise or metadata is given, list all metadata tags
+       associated to DC"""
+    if enterprise_id:
+        request = "enterprises/%s/metadatatags" % enterprise_id
+    elif metadata_id:
+        request = "metadatas/%s/metadatatags" % metadata_id
+    else:
+        request = "metadatatags"
+    result = ctx.obj['nc'].get(request, filter=filter)
+    table = PrettyTable(["ID", "name", "description"])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['name'],
+                       line['description']])
+    print table
+
+
+@vsdcli.command(name='metadatatag-show')
+@click.argument('metadatatag-id', metavar='<ID>', required=True)
+@click.pass_context
+def metadatatag_show(ctx, metadatatag_id):
+    """Show information for a given metadata tag id"""
+    result = ctx.obj['nc'].get("metadatatags/%s" % metadatatag_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='metadatatag-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--enterprise-id', metavar='<ID>')
+@click.option('--description')
+@click.pass_context
+def metadatatag_create(ctx, name, enterprise_id, description):
+    """Add an metadatatag to a given enterprise. CSPROOT can create DC
+       associated tag if enterprise id is not specified"""
+    if enterprise_id:
+        request = "enterprises/%s/metadatatags" % enterprise_id
+    else:
+        request = "metadatatags"
+    params = {'name': name,
+              'description': description}
+    result = ctx.obj['nc'].post(request, params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='metadatatag-delete')
+@click.argument('metadatatag-id', metavar='<metadatatag ID>', required=True)
+@click.pass_context
+def metadatatag_delete(ctx, metadatatag_id):
+    """Delete a given metadatatag"""
+    ctx.obj['nc'].delete("metadatatags/%s" % metadatatag_id)
+
+
+@vsdcli.command(name='metadatatag-update')
+@click.argument('metadatatag-id', metavar='<metadatatag ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def metadatatag_update(ctx, metadatatag_id, key_value):
+    """Update key/value for a given metadatatag"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':', 1)
+        params[key] = value
+    ctx.obj['nc'].put("metadatatags/%s" % metadatatag_id, params)
+    result = ctx.obj['nc'].get("metadatatags/%s" % metadatatag_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
