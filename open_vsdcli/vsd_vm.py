@@ -62,6 +62,48 @@ def vm_delete(ctx, vm_id):
     result = ctx.obj['nc'].delete("vms/%s" % vm_id)
 
 
+@vsdcli.command(name='vm-create', help='Create a new VM. One interface is needed')
+@click.argument('name', metavar='<vm ID>', required=True)
+@click.option('--uuid', metavar='<vm uuid>', required=True,
+              help='UUID of the associated virtual machine')
+@click.option('--vport-id', metavar='<vport ID>', required=True,
+              help='ID of the vport that the interface is attached to')
+@click.option('--mac', metavar='<mac address>', required=True,
+              help='Mac address in format aa:bb:cc:dd:ee:ff')
+@click.option('--ipaddress', metavar='<IP Address>',
+              help='Mac address in format a.b.c.d. If no IP is given, '
+              'VSD will assign one if needed')
+@click.pass_context
+def vm_create(ctx, name, uuid, vport_id, mac, ipaddress):
+    """Create VM for a given ID"""
+    params = {'name': name,
+              'UUID': uuid,
+              'interfaces': [{'VPortID': vport_id,
+                              'MAC': mac,
+                              'IPAddress': ipaddress}
+                            ]
+             }
+    result = ctx.obj['nc'].post("vms", params)[0]
+    print_object(result, exclude=['interfaces', 'resyncInfo'],
+                 only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='vm-update')
+@click.argument('vm-id', metavar='<vm ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def vm_update(ctx, vm_id, key_value):
+    """Update key/value for a given vm"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':', 1)
+        params[key] = value
+    ctx.obj['nc'].put("vms/%s" % vm_id, params)
+    result = ctx.obj['nc'].get("vms/%s" % vm_id)[0]
+    print_object(result, exclude=['interfaces', 'resyncInfo'],
+                 only=ctx.obj['show_only'])
+
+
 @vsdcli.command(name='vminterface-list')
 @click.option('--subnet-id', metavar='<id>')
 @click.option('--zone-id', metavar='<id>')
@@ -107,6 +149,32 @@ def vminterfaces_list(ctx, filter, **ids):
 def vminterface_show(ctx, vminterface_id):
     """Show information for a given VM interface ID"""
     result = ctx.obj['nc'].get("vminterfaces/%s" % vminterface_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='vminterface-create', help='Add an interface to a given VM')
+@click.option('--name', metavar='<Interface name>')
+@click.option('--vm-id', metavar='<vm id>', required=True,
+              help='VM ID (it\'s not the UUID, it\'s the VSD ID)')
+@click.option('--vport-id', metavar='<vport ID>',
+              help='ID of the vport that the interface is attached to')
+@click.option('--network-id', metavar='<network ID>',
+              help='ID of the network that the interface is attached to. '
+                   'Can be either l2domain or subnet within domain')
+@click.option('--mac', metavar='<mac address>', required=True,
+              help='Mac address in format aa:bb:cc:dd:ee:ff')
+@click.option('--ipaddress', metavar='<IP Address>',
+              help='Mac address in format a.b.c.d. If no IP is given, '
+              'VSD will assign one if needed')
+@click.pass_context
+def vminterface_create(ctx, name, vm_id, vport_id, network_id, mac, ipaddress):
+    """Add interface to a given VM"""
+    params = {'name': name,
+              'VPortID': vport_id,
+              'attachedNetworkID': network_id,
+              'MAC': mac,
+              'IPAddress': ipaddress}
+    result = ctx.obj['nc'].post("vms/%s/vminterfaces" % vm_id, params)[0]
     print_object(result, only=ctx.obj['show_only'])
 
 
