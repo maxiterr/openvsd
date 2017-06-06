@@ -46,7 +46,8 @@ subnet
 user
 dhcp
 gateway
-redundancygroups"
+redundancygroups
+metadata"
 
 for test in $(echo "$TEST_LIST" | grep "$1"); do
   echo ""
