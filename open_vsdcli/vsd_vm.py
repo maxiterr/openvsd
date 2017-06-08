@@ -63,10 +63,10 @@ def vm_delete(ctx, vm_id):
 
 
 @vsdcli.command(name='vm-create', help='Create a new VM. One interface is needed')
-@click.argument('name', metavar='<vm ID>', required=True)
-@click.option('--uuid', metavar='<vm uuid>', required=True,
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--uuid', metavar='<uuid>', required=True,
               help='UUID of the associated virtual machine')
-@click.option('--vport-id', metavar='<vport ID>', required=True,
+@click.option('--vport-id', metavar='<ID>', required=True,
               help='ID of the vport that the interface is attached to')
 @click.option('--mac', metavar='<mac address>', required=True,
               help='Mac address in format aa:bb:cc:dd:ee:ff')
@@ -89,7 +89,7 @@ def vm_create(ctx, name, uuid, vport_id, mac, ipaddress):
 
 
 @vsdcli.command(name='vm-update')
-@click.argument('vm-id', metavar='<vm ID>', required=True)
+@click.argument('vm-id', metavar='<ID>', required=True)
 @click.option('--key-value', metavar='<key:value>', multiple=True)
 @click.pass_context
 def vm_update(ctx, vm_id, key_value):
