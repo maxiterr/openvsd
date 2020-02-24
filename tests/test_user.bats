@@ -34,7 +34,7 @@ source common.bash
 @test "User: create with missing element" {
     run vsd user-create --firstname john --lastname doe --email john.doe@nomail.com --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"username\"."
+    assert_line_equals -1 "Error: Missing argument \"<username>\"."
 
     run vsd user-create jdoe --firstname john --email john.doe@nomail.com --password xDz3R --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
@@ -98,7 +98,7 @@ source common.bash
 @test "Group: create with missing elements" {
     run vsd group-create --enterprise-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"name\"."
+    assert_line_equals -1 "Error: Missing argument \"<Group name>\"."
 
     run vsd group-create group-1
     assert_fail
@@ -153,7 +153,7 @@ source common.bash
 @test "Group: add user in group with missing elements" {
     run vsd group-add-user --user-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"group-id\"."
+    assert_line_equals -1 "Error: Missing argument \"<group ID>\"."
 
     run vsd group-add-user 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
@@ -171,7 +171,7 @@ source common.bash
 @test "Group: delete user in group with missing elements" {
     run vsd group-del-user --user-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"group-id\"."
+    assert_line_equals -1 "Error: Missing argument \"<group ID>\"."
 
     run vsd group-del-user 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
