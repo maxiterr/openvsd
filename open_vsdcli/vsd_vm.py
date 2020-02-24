@@ -131,14 +131,12 @@ def vminterfaces_list(ctx, filter, **ids):
                          "VM UUID",
                          "IP Address",
                          "Netmask",
-                         "Floating IP",
                          "MAC"])
     for line in result:
         table.add_row([line['ID'],
                        line['VMUUID'],
                        line['IPAddress'],
                        line['netmask'],
-                       line['associatedFloatingIPAddress'],
                        line['MAC']])
     print table
 
