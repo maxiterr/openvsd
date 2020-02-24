@@ -99,7 +99,7 @@ source common.bash
 
     run vsd domain-create --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --template-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"name\"."
+    assert_line_equals -1 "Error: Missing argument \"<name>\"."
 }
 
 
@@ -188,7 +188,7 @@ source common.bash
 
     run vsd zone-create --domain-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"name\"."
+    assert_line_equals -1 "Error: Missing argument \"<name>\"."
 }
 
 

@@ -32,7 +32,7 @@ source common.bash
 @test "Metadata tag: create with missing element" {
     run vsd metadatatag-create --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
     assert_fail
-    assert_output_contains "Error: Missing argument \"name\"."
+    assert_output_contains "Error: Missing argument \"<name>\"."
 }
 
 
