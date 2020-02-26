@@ -62,7 +62,8 @@ def vm_delete(ctx, vm_id):
     result = ctx.obj['nc'].delete("vms/%s" % vm_id)
 
 
-@vsdcli.command(name='vm-create', help='Create a new VM. One interface is needed')
+@vsdcli.command(name='vm-create',
+                help='Create a new VM. One interface is needed')
 @click.argument('name', metavar='<name>', required=True)
 @click.option('--uuid', metavar='<uuid>', required=True,
               help='UUID of the associated virtual machine')
@@ -80,9 +81,7 @@ def vm_create(ctx, name, uuid, vport_id, mac, ipaddress):
               'UUID': uuid,
               'interfaces': [{'VPortID': vport_id,
                               'MAC': mac,
-                              'IPAddress': ipaddress}
-                            ]
-             }
+                              'IPAddress': ipaddress}]}
     result = ctx.obj['nc'].post("vms", params)[0]
     print_object(result, exclude=['interfaces', 'resyncInfo'],
                  only=ctx.obj['show_only'])
@@ -150,7 +149,8 @@ def vminterface_show(ctx, vminterface_id):
     print_object(result, only=ctx.obj['show_only'])
 
 
-@vsdcli.command(name='vminterface-create', help='Add an interface to a given VM')
+@vsdcli.command(name='vminterface-create',
+                help='Add an interface to a given VM')
 @click.option('--name', metavar='<Interface name>')
 @click.option('--vm-id', metavar='<vm id>', required=True,
               help='VM ID (it\'s not the UUID, it\'s the VSD ID)')
