@@ -38,7 +38,10 @@ def license_show(ctx, license_id, verbose):
     result = ctx.obj['nc'].get("licenses/%s" % license_id)[0]
     print_object(result, exclude=['license'], only=ctx.obj['show_only'])
     if verbose >= 1:
-        print "License: " + result['license']
+        if result['license']:
+            print "License: " + result['license']
+        else:
+            print("License: None")
 
 
 @vsdcli.command(name='license-create')
