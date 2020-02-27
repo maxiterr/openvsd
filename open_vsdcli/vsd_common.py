@@ -30,7 +30,6 @@ def print_object(obj, only=None, exclude=[]):
                 else:
                     if key.endswith(('Date', 'Expiry')) and \
                        not obj[key] == 'null' and obj[key]:
-                        print obj[key]
                         value = strftime(
                             "%Y-%m-%d %H:%M:%S UTC",
                             gmtime(float(obj[key])/1000)
