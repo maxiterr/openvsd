@@ -153,6 +153,7 @@ def me_show():
         reply[0]['DateDecodeDate'] = '1469448000000'
         reply[0]['DateNotDecode'] = '1469448000000'
         reply[0]['ExpiryDecodeExpiry'] = '1469448000000'
+        reply[0]['DateNoneDate'] = None
 
     if auth == "XREST bnVsbGRhdGU6dGVzdA==":
         reply[0]['DateDecodeDate'] = 'null'
