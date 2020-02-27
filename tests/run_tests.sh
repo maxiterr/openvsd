@@ -45,6 +45,9 @@ domain
 subnet
 user
 dhcp
+policy
+vm
+vport
 gateway
 redundancygroups
 metadata"
