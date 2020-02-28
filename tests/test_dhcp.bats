@@ -35,7 +35,7 @@ source common.bash
     # Miss subnet-id
     run vsd dhcp-option-add --value 18c0a80ac0a80001 --type 79 --length 08
     assert_fail
-    assert_line_contains -1 "Error: You must specify only one id in"
+    assert_line_contains -1 "Error: You must specify one and only one id in"
 
     # Miss value
     run vsd dhcp-option-add --subnet-id 255d9673-7281-43c4-be57-fdec677f6e07 --type 79 --length 08
