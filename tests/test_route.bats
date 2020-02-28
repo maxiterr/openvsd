@@ -1,5 +1,6 @@
-# Copyright 2015 Maxime Terras <maxime.terras@numergy.com>
-# Copyright 2015 Pierre Padrixe <pierre.padrixe@gmail.com>
+#!/usr/bin/env bats
+
+# Copyright 2020 Maxime Terras <maxime.terras@numergy.com>
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -14,23 +15,10 @@
 #    under the License.
 
 
-from vsd_license import *
-from vsd_enterprise import *
-from vsd_domain import *
-from vsd_subnet import *
-from vsd_user import *
-from vsd_gateway import *
-from vsd_vsp import *
-from vsd_vm import *
-from vsd_vport import *
-from vsd_policy import *
-from vsd_dhcp import *
-from vsd_metadata import *
-from vsd_route import *
+load helpers
+source common.bash
 
 
-def main():
-    vsdcli(obj={})
-
-if __name__ == '__main__':
-    main()
+@test "Pep8: vsd_route.py" {
+    command pep8 --first ../open_vsdcli/vsd_route.py
+}

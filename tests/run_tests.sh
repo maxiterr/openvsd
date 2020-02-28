@@ -46,6 +46,7 @@ subnet
 user
 dhcp
 policy
+route
 vm
 vport
 gateway

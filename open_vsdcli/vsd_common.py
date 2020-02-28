@@ -47,7 +47,7 @@ def print_object(obj, only=None, exclude=[]):
         _print_table(obj, exclude)
 
 
-def check_id(**ids):
+def check_id(one_and_only_one=True, **ids):
     # Remove '_id' at the end of key names
     new_ids = {}
     for k, v in ids.items():
@@ -61,10 +61,11 @@ def check_id(**ids):
         if v is not None:
             nb_ids += 1
             good_k = k
-    if nb_ids != 1:
+    if nb_ids == 0 and one_and_only_one is False:
+        return None, None
+    elif nb_ids != 1:
         raise click.exceptions.UsageError(
-            "You must specify only one id in %s" % ids.keys())
-
+            "You must specify one and only one id in %s" % ids.keys())
     return good_k, ids[good_k]
 
 
