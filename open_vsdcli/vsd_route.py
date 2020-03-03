@@ -14,7 +14,7 @@ from vsd_common import *
                    'externalID, IPType, IPv6Address, netmask, nextHopIP, '
                    'routeDistinguisher')
 @click.pass_context
-def l2domain_list(ctx, filter, **ids):
+def staticroute_list(ctx, filter, **ids):
     """List statics route"""
     id_type, id = check_id(one_and_only_one=False, **ids)
     if id_type is None and id is None:
@@ -48,3 +48,71 @@ def domaintemplate_show(ctx, staticroute_id):
     """Show information for a given static route id"""
     result = ctx.obj['nc'].get("staticroutes/%s" % staticroute_id)[0]
     print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='staticroute-create')
+@click.option('--sharednetworkresource-id',
+              metavar='<Shared network resource ID>')
+@click.option('--domain-id', metavar='<Domain id>')
+@click.option('--l2domain-id', metavar='<L2 Domain id>')
+@click.option('--aggregateddomain-id', metavar='<Aggregated dommain id>')
+@click.option('--address', metavar='<address IPv4 or IPv6>', required=True)
+@click.option('--mask', metavar='<netmask or mask length>',
+              help='Mask must be length for IPv6', required=True)
+@click.option('--gateway', metavar='<gateway IPv4 or IPv6>', required=True)
+@click.option('--ip-type', type=click.Choice(['IPV4',
+                                             'IPV6']),
+              default='IPV4', help='Default : IPV4')
+@click.pass_context
+def subnet_create(ctx, address, mask, gateway, ip_type, **ids):
+    """Create route for domain, l2domain, shared network"""
+    """or aggregate domain"""
+    id_type, id = check_id(**ids)
+
+    try:
+        int(mask)
+        mask_is_netmask = False
+    except ValueError:
+        mask_is_netmask = True
+
+    if ip_type == 'IPV6':
+        if mask_is_netmask:
+            raise click.exceptions.UsageError(
+                "For IPv6 mask must be a length")
+        params = {'IPv6Address': address + '/' + mask,
+                  'nextHopIp': gateway}
+    else:
+        if not mask_is_netmask:
+            netmask = length_to_netmask(mask)
+        else:
+            netmask = mask
+        params = {'address': address,
+                  'netmask': netmask,
+                  'nextHopIp': gateway}
+
+    result = ctx.obj['nc'].post("%ss/%s/staticroutes?responseChoice=1"
+                                % (id_type, id), params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='staticroute-update')
+@click.argument('route-id', metavar='<Static route ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def subnet_update(ctx, route_id, key_value):
+    """Update key/value for a given static route"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':', 1)
+        params[key] = value
+    ctx.obj['nc'].put("staticroutes/%s?responseChoice=1" % route_id, params)
+    result = ctx.obj['nc'].get("staticroutes/%s" % route_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='staticroute-delete')
+@click.argument('staticroute-id', metavar='<Static route ID>', required=True)
+@click.pass_context
+def subnet_delete(ctx, staticroute_id):
+    """Delete a given static route"""
+    ctx.obj['nc'].delete("staticroutes/%s?responseChoice=1" % staticroute_id)

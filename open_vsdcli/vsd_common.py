@@ -89,6 +89,13 @@ def netmask_to_length(netmask):
     return str(length)
 
 
+def length_to_netmask(length):
+    octet = []
+    for i in [3, 2, 1, 0]:
+        octet.append(str((0xffffffff << (32 - int(length)) >> i*8) & 0xff))
+    return '.'.join(octet)
+
+
 def print_creds(ctx, param, value):
     if not value or ctx.resilient_parsing:
         return
