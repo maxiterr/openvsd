@@ -87,6 +87,15 @@ class VSDConnection(object):
             return []
         return resp.json()
 
+    def remove_extra_slash_url(func):
+        def wrapper(self, url, *args, **kwargs):
+            if url.startswith('/'):
+                return func(self, url[1:], *args, **kwargs)
+            else:
+                return func(self, url, *args, **kwargs)
+        return wrapper
+
+    @remove_extra_slash_url
     def get(self, url, filter=None, headers={}):
         def _next_page_is_invalid(headers):
             if ('X-Nuage-PageSize' not in headers or
@@ -116,6 +125,7 @@ class VSDConnection(object):
                 break
         return resp
 
+    @remove_extra_slash_url
     def post(self, url, params, headers={}):
         self.authenticate()
         h = self.headers.copy()
@@ -124,6 +134,7 @@ class VSDConnection(object):
                              headers=h, params=params)
         return self._response(r)
 
+    @remove_extra_slash_url
     def put(self, url, params, headers={}):
         self.authenticate()
         h = self.headers.copy()
@@ -132,6 +143,7 @@ class VSDConnection(object):
                              headers=h, params=params)
         return self._response(r)
 
+    @remove_extra_slash_url
     def delete(self, url):
         self.authenticate()
         r = self._do_request('DELETE', self.base_url + url,

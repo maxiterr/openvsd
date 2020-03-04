@@ -172,6 +172,13 @@ source common.bash
 }
 
 
+@test "free-api: endpoint can start with /" {
+    run vsd --debug free-api /double-slash
+    assert_success
+    assert_output_contains '/nuage/api/v3_2/double-slash'
+}
+
+
 @test "free-api: list all enterprises with GET" {
     run vsd free-api enterprises --verb GET
     assert_success
