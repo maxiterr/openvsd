@@ -59,8 +59,9 @@ source common.bash
     assert_success
     assert_output_contains "export VSD_USERNAME"
     assert_output_contains "export VSD_PASSWORD"
-    assert_output_contains "export VSD_ORGANIZATION"
-    assert_output_contains "export VSD_URL"
+    assert_output_contains "export VSD_ENTERPRISE"
+    assert_output_contains "export VSD_API_URL"
+    assert_output_contains "export VSD_API_VERSION"
 }
 
 
@@ -151,7 +152,7 @@ source common.bash
 
 
 @test "VSD mock: reset" {
-    run curl -sS ${VSD_URL}reset
+    run curl -sS ${VSD_API_URL}/nuage/api/v${VSD_API_VERSION}/reset
     assert_success
 }
 
@@ -164,7 +165,7 @@ source common.bash
 
 
 @test "free-api: list all enterprises (GET as default)" {
-    run vsd free-api enterprises
+    run vsd --debug free-api enterprises
     assert_success
     assert_output_contains '"name": "nulab-1"'
     assert_output_contains '"name": "nulab-2"'
