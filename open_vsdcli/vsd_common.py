@@ -101,8 +101,9 @@ def print_creds(ctx, param, value):
         return
     click.echo('export VSD_USERNAME=<username>')
     click.echo('export VSD_PASSWORD=<password>')
-    click.echo('export VSD_ORGANIZATION=csp')
-    click.echo('export VSD_URL=https://<host>:<port>/nuage/api/v3_2/')
+    click.echo('export VSD_ENTERPRISE=csp')
+    click.echo('export VSD_API_VERSION=5_0')
+    click.echo('export VSD_API_URL=https://<host>:<port>')
     ctx.exit()
 
 
@@ -120,19 +121,24 @@ def print_version(ctx, param, value):
               expose_value=False, help='Display creds example')
 @click.option('--version', is_flag=True, callback=print_version, is_eager=True,
               expose_value=False, help='Display version and exit')
-@click.option('--vsd-url', metavar='<url>', envvar='VSD_URL', required=True,
-              help='VSD url http(s)://hostname:port/nuage/api_v3_2'
-                   ' (Env: VSD_URL)')
+@click.option('--vsd-api-url', metavar='<url>', envvar='VSD_API_URL',
+              required=True,
+              help='VSD url http(s)://hostname:port/nuage/api'
+              ' (Env: VSD_API_URL)')
 @click.option('--vsd-username', metavar='<username>', envvar='VSD_USERNAME',
               required=True,
               help='VSD Authentication username (Env: VSD_USERNAME)')
 @click.option('--vsd-password', metavar='<password>', envvar='VSD_PASSWORD',
               required=True,
               help='VSD Authentication password (Env: VSD_PASSWORD)')
-@click.option('--vsd-organization', metavar='<organization>',
-              envvar='VSD_ORGANIZATION',
+@click.option('--vsd-enterprise', metavar='<enterprise>',
+              envvar='VSD_ENTERPRISE',
               required=True,
-              help='VSD Authentication organization (Env: VSD_ORGANIZATION)')
+              help='VSD Authentication enterprise (Env: VSD_ENTERPRISE)')
+@click.option('--vsd-api-version', metavar='<api version>',
+              envvar='VSD_API_VERSION',
+              required=True,
+              help='VSD Authentication organization (Env: VSD_API_VERSION)')
 @click.option('--show-only', metavar='<key>',
               help='Show only the value for a given key'
                    ' (usable for show and create command)')
@@ -141,14 +147,15 @@ def print_version(ctx, param, value):
 @click.option('--force-auth', is_flag=True,
               help='Do not use existing APIkey. Replay authentication')
 @click.pass_context
-def vsdcli(ctx, vsd_username, vsd_password, vsd_organization,
-           vsd_url, show_only, debug, force_auth):
+def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise,
+           vsd_api_version, vsd_api_url, show_only, debug, force_auth):
     """Command-line interface to the VSD APIs"""
     nc = VSDConnection(
             vsd_username,
             vsd_password,
-            vsd_organization,
-            vsd_url,
+            vsd_enterprise,
+            vsd_api_url,
+            vsd_api_version,
             debug=debug,
             force_auth=force_auth
          )

@@ -19,18 +19,18 @@ import base64
 
 
 class VSDConnection(object):
-    def __init__(self, username, password, organization,
-                 base_url, debug=False, force_auth=False):
-        if base_url.endswith('/'):
-            self.base_url = base_url
+    def __init__(self, username, password, enterprise,
+                 api, api_version, debug=False, force_auth=False):
+        if api.endswith('/'):
+            self.base_url = '%snuage/api/v%s/' % (api, api_version)
         else:
-            self.base_url = "%s/" % base_url
+            self.base_url = '%s/nuage/api/v%s/' % (api, api_version)
         self.username = username
         auth_base64 = base64.urlsafe_b64encode('%s:%s' % (username, password))
         self.headers = {
             'Authorization': "XREST %s" % auth_base64,
             'Content-Type': "application/json",
-            'X-Nuage-Organization': organization
+            'X-Nuage-Organization': enterprise
         }
         self.debug = debug
         self.force_auth = force_auth
@@ -87,6 +87,15 @@ class VSDConnection(object):
             return []
         return resp.json()
 
+    def remove_extra_slash_url(func):
+        def wrapper(self, url, *args, **kwargs):
+            if url.startswith('/'):
+                return func(self, url[1:], *args, **kwargs)
+            else:
+                return func(self, url, *args, **kwargs)
+        return wrapper
+
+    @remove_extra_slash_url
     def get(self, url, filter=None, headers={}):
         def _next_page_is_invalid(headers):
             if ('X-Nuage-PageSize' not in headers or
@@ -116,6 +125,7 @@ class VSDConnection(object):
                 break
         return resp
 
+    @remove_extra_slash_url
     def post(self, url, params, headers={}):
         self.authenticate()
         h = self.headers.copy()
@@ -124,6 +134,7 @@ class VSDConnection(object):
                              headers=h, params=params)
         return self._response(r)
 
+    @remove_extra_slash_url
     def put(self, url, params, headers={}):
         self.authenticate()
         h = self.headers.copy()
@@ -132,6 +143,7 @@ class VSDConnection(object):
                              headers=h, params=params)
         return self._response(r)
 
+    @remove_extra_slash_url
     def delete(self, url):
         self.authenticate()
         r = self._do_request('DELETE', self.base_url + url,
