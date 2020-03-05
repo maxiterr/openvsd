@@ -138,6 +138,14 @@ source common.bash
 }
 
 
+@test "Domain: list" {
+    run vsd domain-list
+    assert_success
+    assert_output_contains_in_table 255d9673-7281-43c4-be57-fdec677f6e07 Domain-1
+    assert_output_contains_in_table 255d9673-7281-43c4-be57-fdec677f6e07 "65000 / 100"
+}
+
+
 @test "Domain: list for a given enterprise" {
     run vsd domain-list --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
     assert_success

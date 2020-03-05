@@ -12,12 +12,16 @@ from vsd_common import *
                    'splitSubnet, proxyARP, enableMulticast, externalID')
 @click.pass_context
 def subnet_list(ctx, filter, **ids):
-    """List subnets for a given zone, app, subnettemplate, or domain id"""
-    id_type, id = check_id(**ids)
-    if not filter:
-        result = ctx.obj['nc'].get("%ss/%s/subnets" % (id_type, id))
+    """List subnets for optionnal zone, app, subnettemplate, or domain id"""
+    id_type, id = check_id(one_and_only_one=False, **ids)
+    if id_type is None and id is None:
+        query = "subnets"
     else:
-        result = ctx.obj['nc'].get("%ss/%s/subnets" % (id_type, id),
+        query = "%ss/%s/subnets" % (id_type, id)
+    if not filter:
+        result = ctx.obj['nc'].get(query)
+    else:
+        result = ctx.obj['nc'].get(query,
                                    filter=filter)
     table = PrettyTable(["Subnet ID",
                          "Name",
