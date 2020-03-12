@@ -26,7 +26,6 @@ source common.bash
 
 @test "VSD mock: reset" {
     command vsd free-api reset
-#    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/zones --verb POST --key-value name:Zone
     command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/domains --verb POST --key-value name:Domain
 }
 
@@ -57,6 +56,16 @@ source common.bash
     assert_output_contains_in_table netmask 255.255.255.0
     assert_output_contains_in_table nextHopIp 10.0.0.1
     assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+@test "Static route: create with bfd enable" {
+    # Reset mock first
+    command vsd free-api reset
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/domains --verb POST --key-value name:Domain
+
+    run vsd staticroute-create --domain-id 255d9673-7281-43c4-be57-fdec677f6e07 --address 192.168.0.0 --mask 255.255.255.0 --gateway 10.0.0.1 --bfd-enabled
+    assert_success
+    assert_output_contains_in_table BFDEnabled True
 }
 
 

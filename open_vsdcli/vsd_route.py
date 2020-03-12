@@ -63,8 +63,10 @@ def domaintemplate_show(ctx, staticroute_id):
 @click.option('--ip-type', type=click.Choice(['IPV4',
                                              'IPV6']),
               default='IPV4', help='Default : IPV4')
+@click.option('--bfd-enabled',  is_flag=True,
+              help='Active BFD for this route')
 @click.pass_context
-def subnet_create(ctx, address, mask, gateway, ip_type, **ids):
+def subnet_create(ctx, address, mask, gateway, ip_type, bfd_enabled, **ids):
     """Create route for domain, l2domain, shared network"""
     """or aggregate domain"""
     id_type, id = check_id(**ids)
@@ -89,6 +91,9 @@ def subnet_create(ctx, address, mask, gateway, ip_type, **ids):
         params = {'address': address,
                   'netmask': netmask,
                   'nextHopIp': gateway}
+
+    if bfd_enabled:
+        params['BFDEnabled'] = True
 
     result = ctx.obj['nc'].post("%ss/%s/staticroutes?responseChoice=1"
                                 % (id_type, id), params)[0]
