@@ -20,7 +20,7 @@ import base64
 
 class VSDConnection(object):
     def __init__(self, username, password, enterprise,
-                 api, api_version, disable_proxy=False,
+                 api, api_version, disable_proxy=False, proxy={},
                  debug=False, force_auth=False):
         if api.endswith('/'):
             self.base_url = '%snuage/api/v%s/' % (api, api_version)
@@ -41,7 +41,10 @@ class VSDConnection(object):
                     "https": None
                     }
         else:
-            self.proxies = None
+            if proxy:
+                self.proxies = proxy
+            else:
+                self.proxies = None
 
     def _do_request(self, method, url, headers=None, params=None):
         import requests
