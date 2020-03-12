@@ -139,6 +139,11 @@ def print_version(ctx, param, value):
               envvar='VSD_API_VERSION',
               required=True,
               help='VSD Authentication organization (Env: VSD_API_VERSION)')
+@click.option('--vsd-disable-proxy',
+              envvar='VSD_DISABLE_PROXY',
+              is_flag=True,
+              help='Disable proxy if defined via env http(s)_proxy'
+              ' (Env: VSD_DISABLE_PROXY)')
 @click.option('--show-only', metavar='<key>',
               help='Show only the value for a given key'
                    ' (usable for show and create command)')
@@ -148,7 +153,8 @@ def print_version(ctx, param, value):
               help='Do not use existing APIkey. Replay authentication')
 @click.pass_context
 def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise,
-           vsd_api_version, vsd_api_url, show_only, debug, force_auth):
+           vsd_api_version, vsd_api_url, show_only, vsd_disable_proxy,
+           debug, force_auth):
     """Command-line interface to the VSD APIs"""
     nc = VSDConnection(
             vsd_username,
@@ -156,6 +162,7 @@ def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise,
             vsd_enterprise,
             vsd_api_url,
             vsd_api_version,
+            disable_proxy=vsd_disable_proxy,
             debug=debug,
             force_auth=force_auth
          )
