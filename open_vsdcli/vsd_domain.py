@@ -73,12 +73,16 @@ def domaintemplate_update(ctx, domaintemplate_id, key_value):
                    'externalID')
 @click.pass_context
 def domain_list(ctx, filter, **ids):
-    """Show domain for a given enterprise or domain id"""
-    id_type, id = check_id(**ids)
-    if not filter:
-        result = ctx.obj['nc'].get("%ss/%s/domains" % (id_type, id))
+    """List domain for optionnal enterprise or domain id"""
+    id_type, id = check_id(one_and_only_one=False, **ids)
+    if id_type is None and id is None:
+        query = "domains"
     else:
-        result = ctx.obj['nc'].get("%ss/%s/domains" % (id_type, id),
+        query = "%ss/%s/domains" % (id_type, id)
+    if not filter:
+        result = ctx.obj['nc'].get(query)
+    else:
+        result = ctx.obj['nc'].get(query,
                                    filter=filter)
     table = PrettyTable(["Domain ID", "Name", "Description", "RT / RD"])
     for line in result:
@@ -143,7 +147,7 @@ def domain_update(ctx, domain_id, key_value):
 
 
 @vsdcli.command(name='zone-list')
-@click.option('--domain-id', metavar='<domain ID>', required=True)
+@click.option('--domain-id', metavar='<domain ID>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for address, netmask, IPType, name, description, '
                    'numberOfHostsInSubnets, publicZone, address, netmask, '
@@ -151,11 +155,15 @@ def domain_update(ctx, domain_id, key_value):
                    'lastUpdatedDate, creationDate, externalID')
 @click.pass_context
 def zone_list(ctx, domain_id, filter):
-    """Show zone for a given domain id"""
-    if not filter:
-        result = ctx.obj['nc'].get("domains/%s/zones" % domain_id)
+    """Show zone for optionnal domain id"""
+    if domain_id is None:
+        query = "zones"
     else:
-        result = ctx.obj['nc'].get("domains/%s/zones" % domain_id,
+        query = "domains/%s/zones" % domain_id
+    if not filter:
+        result = ctx.obj['nc'].get(query)
+    else:
+        result = ctx.obj['nc'].get(query,
                                    filter=filter)
     table = PrettyTable(["Zone ID", "Name"])
     for line in result:
