@@ -152,7 +152,7 @@ source common.bash
 
 
 @test "VSD mock: reset" {
-    run curl -sS ${VSD_API_URL}/nuage/api/v${VSD_API_VERSION}/reset
+    run curl -v --noproxy localhost -sS ${VSD_API_URL}/nuage/api/v${VSD_API_VERSION}/reset
     assert_success
 }
 

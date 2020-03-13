@@ -3,3 +3,4 @@ export VSD_PASSWORD=test
 export VSD_ENTERPRISE=test
 export VSD_API_URL=http://localhost:5000
 export VSD_API_VERSION=3_2
+export VSD_DISABLE_PROXY=True

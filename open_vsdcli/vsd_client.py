@@ -20,7 +20,8 @@ import base64
 
 class VSDConnection(object):
     def __init__(self, username, password, enterprise,
-                 api, api_version, debug=False, force_auth=False):
+                 api, api_version, disable_proxy=False, proxy={},
+                 debug=False, force_auth=False):
         if api.endswith('/'):
             self.base_url = '%snuage/api/v%s/' % (api, api_version)
         else:
@@ -34,6 +35,16 @@ class VSDConnection(object):
         }
         self.debug = debug
         self.force_auth = force_auth
+        if disable_proxy:
+            self.proxies = {
+                    "http": None,
+                    "https": None
+                    }
+        else:
+            if proxy:
+                self.proxies = proxy
+            else:
+                self.proxies = None
 
     def _do_request(self, method, url, headers=None, params=None):
         import requests
@@ -52,7 +63,8 @@ class VSDConnection(object):
                 print "# Parameters: %s" % data
                 print '#####################################################'
             response = requests.request(method, url, headers=headers,
-                                        verify=False, timeout=10, data=data)
+                                        verify=False, timeout=10, data=data,
+                                        proxies=self.proxies)
         except requests.exceptions.RequestException as error:
             print 'Error: Unable to connect.'
             print 'Detail: %s' % error

@@ -139,6 +139,20 @@ def print_version(ctx, param, value):
               envvar='VSD_API_VERSION',
               required=True,
               help='VSD Authentication organization (Env: VSD_API_VERSION)')
+@click.option('--vsd-disable-proxy',
+              envvar='VSD_DISABLE_PROXY',
+              is_flag=True,
+              help='Disable proxy if defined via env http(s)_proxy'
+              ' (Env: VSD_DISABLE_PROXY)')
+@click.option('--vsd-http-proxy',
+              envvar='VSD_HTTP_PROXY', metavar='<127.0.0.1:3128>',
+              help='Use this proxy to reach the vsd and override env'
+              ' http(s)_proxy. (Env: VSD_HTTP_PROXY)')
+@click.option('--vsd-https-proxy',
+              envvar='VSD_HTTPS_PROXY', metavar='<127.0.0.1:3128>',
+              help='Use this proxy to reach the vsd and override env'
+              ' https_proxy. If ommited, https proxy will be set with the'
+              ' given http-proxy (Env: VSD_HTTPS_PROXY)')
 @click.option('--show-only', metavar='<key>',
               help='Show only the value for a given key'
                    ' (usable for show and create command)')
@@ -148,14 +162,33 @@ def print_version(ctx, param, value):
               help='Do not use existing APIkey. Replay authentication')
 @click.pass_context
 def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise,
-           vsd_api_version, vsd_api_url, show_only, debug, force_auth):
+           vsd_api_version, vsd_api_url, show_only, vsd_disable_proxy,
+           vsd_http_proxy, vsd_https_proxy, debug, force_auth):
     """Command-line interface to the VSD APIs"""
+    if vsd_http_proxy and vsd_https_proxy:
+        proxies = {
+                "http": vsd_http_proxy,
+                "https": vsd_https_proxy}
+    elif vsd_http_proxy and not vsd_https_proxy:
+        proxies = {
+                "http": vsd_http_proxy,
+                "https": vsd_http_proxy}
+    elif not vsd_http_proxy and not vsd_https_proxy:
+        proxies = {
+                "http": None,
+                "https": None}
+    else:
+        raise click.exceptions.UsageError(
+                "https proxy can be ommited when http proxy is given, but not"
+                " the oposite")
     nc = VSDConnection(
             vsd_username,
             vsd_password,
             vsd_enterprise,
             vsd_api_url,
             vsd_api_version,
+            disable_proxy=vsd_disable_proxy,
+            proxy=proxies,
             debug=debug,
             force_auth=force_auth
          )
