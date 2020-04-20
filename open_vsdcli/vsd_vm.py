@@ -129,14 +129,18 @@ def vminterfaces_list(ctx, filter, **ids):
     table = PrettyTable(["ID",
                          "VM UUID",
                          "IP Address",
-                         "Netmask",
-                         "MAC"])
+                         "MAC",
+                         "Vport id"])
     for line in result:
+        if line['IPAddress']:
+            cidr = line['IPAddress'] + '/' + netmask_to_length(line['netmask'])
+        else:
+            cidr = None
         table.add_row([line['ID'],
                        line['VMUUID'],
-                       line['IPAddress'],
-                       line['netmask'],
-                       line['MAC']])
+                       cidr,
+                       line['MAC'],
+                       line['VPortID']])
     print table
 
 
