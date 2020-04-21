@@ -35,6 +35,7 @@ def vporttag_list(ctx, filter, **ids):
 @click.option('--l2domain-id', metavar='<id>')
 @click.option('--vporttag-id', metavar='<id>')
 @click.option('--subnet-id', metavar='<id>')
+@click.option('--trunk-id', metavar='<id>')
 @click.option('--filter', metavar='<filter>',
               help='Filter for name, type, lastUpdatedDate, creationDate, '
                    'externalID')
@@ -45,12 +46,27 @@ def vport_list(ctx, filter, **ids):
     id_type, id = check_id(**ids)
     request = "%ss/%s/vports" % (id_type, id)
     result = ctx.obj['nc'].get(request, filter=filter)
-    table = PrettyTable(["ID", "name", "active", "type"])
-    for line in result:
-        table.add_row([line['ID'],
-                       line['name'],
-                       line['active'],
-                       line['type']])
+    if id_type == "trunk":
+        table = PrettyTable(["ID",
+                             "name",
+                             "active",
+                             "type",
+                             "Trunk role",
+                             "Vlan"])
+        for line in result:
+            table.add_row([line['ID'],
+                           line['name'],
+                           line['active'],
+                           line['type'],
+                           line['trunkRole'],
+                           line['segmentationID']])
+    else:
+        table = PrettyTable(["ID", "name", "active", "type"])
+        for line in result:
+            table.add_row([line['ID'],
+                           line['name'],
+                           line['active'],
+                           line['type']])
     print table
 
 
@@ -158,4 +174,33 @@ def bridgeinterface_create(ctx, name, vport_id):
     params = {'name': name}
     result = ctx.obj['nc'].post("vports/%s/bridgeinterfaces" % vport_id,
                                 params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='trunk-list')
+@click.option('--enterprise-id', metavar='<id>')
+@click.option('--vport-id', metavar='<id>')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for name or externalID')
+@click.pass_context
+def trunk_list(ctx, filter, **ids):
+    """List all trunk in enterprise or attach to a vport"""
+    id_type, id = check_id(**ids)
+    request = "%ss/%s/trunks" % (id_type, id)
+    result = ctx.obj['nc'].get(request, filter=filter)
+
+    table = PrettyTable(["ID", "name", "associatedVPortID"])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['name'],
+                       line['associatedVPortID']])
+    print table
+
+
+@vsdcli.command(name='trunk-show')
+@click.argument('trunk-id', metavar='<id>', required=True)
+@click.pass_context
+def trunk_show(ctx, trunk_id):
+    """Show information for a given trunk id"""
+    result = ctx.obj['nc'].get("trunks/%s" % trunk_id)[0]
     print_object(result, only=ctx.obj['show_only'])
