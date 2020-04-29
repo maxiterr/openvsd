@@ -106,3 +106,129 @@ source common.bash
     assert_line_equals 0 "Error: Cannot find object with ID"
 }
 
+
+@test "Trunk: reset mock" {
+    command vsd free-api reset
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/domains --verb POST \
+                         --key-value name:Domain \
+                         --key-value parentID:92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/subnets --verb POST --key-value name:Subnet
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/l2domains --verb POST \
+                         --key-value name:L2Domain \
+                         --key-value parentID:92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
+    command vsd free-api subnets/255d9673-7281-43c4-be57-fdec677f6e07/vports --verb POST \
+                         --key-value parentType:subnet \
+                         --key-value domainID:255d9673-7281-43c4-be57-fdec677f6e07 \
+                         --key-value name:Vport-1 \
+                         --key-value active:True \
+                         --key-value type:VM \
+                         --key-value trunkRole:SUB_PORT
+    command vsd free-api vports/255d9673-7281-43c4-be57-fdec677f6e07 --verb PUT --key-value ID:d1462209-d658-4aaf-bafe-3d359d9b69f4
+    command vsd free-api l2domains/255d9673-7281-43c4-be57-fdec677f6e07/vports --verb POST \
+                         --key-value parentType:l2domain \
+                         --key-value parentID:255d9673-7281-43c4-be57-fdec677f6e07 \
+                         --key-value name:Vport-2 \
+                         --key-value active:True \
+                         --key-value type:VM \
+                         --key-value trunkRole:PARENT_PORT
+}
+
+
+@test "Trunk: create with missing element" {
+    run vsd trunk-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals -1 "Error: Missing argument \"<name>\"."
+
+    run vsd trunk-create Trunk-1
+    assert_fail
+    assert_output_contains "Error: Missing option \"--vport-id\"."
+}
+
+
+@test "Trunk: create with enterprise specified" {
+    run vsd trunk-create Trunk-1 --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
+    assert_success
+    assert_output_contains_in_table name Trunk-1
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Trunk: update" {
+    skip "Update command doesn't exist yet"
+    run vsd trunk-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value description:MyDescription
+    assert_success
+    assert_output_contains_in_table description MyDescription
+}
+
+
+@test "Trunk: list for a given enterprise" {
+    run vsd trunk-list --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
+    assert_success
+    assert_output_contains_in_table 255d9673-7281-43c4-be57-fdec677f6e07 Trunk-1
+}
+
+
+@test "Trunk: list for a given vport" {
+    run vsd trunk-list --vport-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table 255d9673-7281-43c4-be57-fdec677f6e07 Trunk-1
+}
+
+
+@test "Trunk: show" {
+    run vsd trunk-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table name Trunk-1
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_output_contains_in_table associatedVPortID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Trunk: delete with --force" {
+    run vsd trunk-delete --force 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+
+    run vsd trunk-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals 0 "Error: Cannot find object with ID"
+}
+
+
+@test "Trunk: create with vport connected to subnet (try to discover enterprise id)" {
+    run vsd trunk-create Trunk-1 --vport-id d1462209-d658-4aaf-bafe-3d359d9b69f4
+    assert_success
+    assert_output_contains_in_table name Trunk-1
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+
+    command vsd trunk-delete --force 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Trunk: create with vport connected to l2domain (try to discover enterprise id)" {
+    run vsd trunk-create Trunk-1 --vport-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table name Trunk-1
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Trunk: delete must failed with 1 sub-port" {
+    run vsd trunk-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+#    assert_line_equals 0 "Error: Cannot find object with ID"
+
+    run vsd trunk-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table name Trunk-1
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Trunk: delete must pass with no sub-port" {
+    command vsd free-api vports/d1462209-d658-4aaf-bafe-3d359d9b69f4 --verb DELETE
+    run vsd trunk-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+
+    run vsd trunk-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+}

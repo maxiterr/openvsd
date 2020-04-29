@@ -204,3 +204,51 @@ def trunk_show(ctx, trunk_id):
     """Show information for a given trunk id"""
     result = ctx.obj['nc'].get("trunks/%s" % trunk_id)[0]
     print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='trunk-create')
+@click.argument('name', metavar='<name>', required=True)
+@click.option('--vport-id', metavar='<ID>', required=True)
+@click.option('--enterprise-id', metavar='<ID>',
+              help='if ommited, try to extracted from vport parent')
+@click.pass_context
+def trunk_create(ctx, name, vport_id, enterprise_id):
+    """Add an bridge interface to a given vport"""
+    if not enterprise_id:
+        result = ctx.obj['nc'].get("vports/%s" % vport_id)[0]
+        if result['parentType'] == 'subnet':
+            parent_id = result['domainID']
+            parent_type = 'domain'
+        else:
+            parent_id = result['parentID']
+            parent_type = 'l2domain'
+        enterprise_id = result = ctx.obj['nc'].get(
+                "%ss/%s" % (parent_type, parent_id))[0]['parentID']
+    params = {'name': name,
+              'associatedVPortID': vport_id}
+    result = ctx.obj['nc'].post("enterprises/%s/trunks" % enterprise_id,
+                                params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='trunk-delete')
+@click.argument('trunk-id', metavar='<ID>', required=True)
+@click.option('--force',  is_flag=True,
+              help='Force deletion even there is sub-vport')
+@click.pass_context
+def trunk_delete(ctx, trunk_id, force):
+    """Delete a given trunk"""
+    request = "trunks/%s" % trunk_id
+    if force:
+        result = ctx.obj['nc'].delete(request + "?responseChoice=1")
+    else:
+        # Check if there is more than 1 vport
+        result = ctx.obj['nc'].get("trunks/%s/vports" % trunk_id)
+        sub_port_count = sum(map(lambda x: x['trunkRole'] == 'SUB_PORT',
+                                 result))
+        if sub_port_count > 0:
+            print("Error: There is %s sub-port attached. "
+                  "Use --force to delete" % sub_port_count)
+            exit(1)
+        else:
+            result = ctx.obj['nc'].delete(request)
