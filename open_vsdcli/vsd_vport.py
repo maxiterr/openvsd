@@ -252,3 +252,88 @@ def trunk_delete(ctx, trunk_id, force):
             exit(1)
         else:
             result = ctx.obj['nc'].delete(request)
+
+
+@vsdcli.command(name='virtualip-list')
+@click.option('--redirectiontargets-id', metavar='<id>')
+@click.option('--vport-id', metavar='<id>')
+@click.option('--subnet-id', metavar='<id>')
+@click.option('--filter', metavar='<filter>',
+              help='Filter for Virtual IP, externalID or IP type (IPV4 or 6)')
+@click.pass_context
+def virtualip_list(ctx, filter, **ids):
+    """List all virtual IP associated to a vport, a redirection target"""
+    """or a subnet"""
+    id_type, id = check_id(**ids)
+    request = "%ss/%s/virtualips" % (id_type, id)
+    result = ctx.obj['nc'].get(request, filter=filter)
+
+    table = PrettyTable(['ID',
+                         'Virtual IP',
+                         'MAC',
+                         'Parent type',
+                         'Parent ID'])
+    for line in result:
+        table.add_row([line['ID'],
+                       line['virtualIP'],
+                       line['MAC'],
+                       line['parentType'],
+                       line['parentID']])
+    print table
+
+
+@vsdcli.command(name='virtualip-show')
+@click.argument('virtualip-id', metavar='<id>', required=True)
+@click.pass_context
+def virtualip_show(ctx, virtualip_id):
+    """Show information for a given virtual ip id"""
+    result = ctx.obj['nc'].get("virtualips/%s" % virtualip_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='virtualip-delete')
+@click.argument('virtualip-id', metavar='<ID>', required=True)
+@click.pass_context
+def virtualip_delete(ctx, virtualip_id):
+    """Delete a given virtual ip"""
+    ctx.obj['nc'].delete("virtualips/%s" % virtualip_id)
+
+
+@vsdcli.command(name='virtualip-create')
+@click.option('--vport-id', metavar='<ID>', required=True)
+@click.option('--virtualip', metavar='<IP>', required=True)
+@click.option('--mac-from-vm', is_flag=True,
+              help='Get the MAC address from the VM interface belong'
+              ' to this vport')
+@click.option('--mac', metavar='<mac>', help='Incompatible with same-as-vm')
+@click.pass_context
+def virtualip_create(ctx, virtualip, vport_id, mac_from_vm, mac):
+    """Add a virtual ip to a given vport"""
+    params = {'virtualIP': virtualip}
+    if mac_from_vm:
+        if mac:
+            raise click.exceptions.UsageError(
+                "When you activate mac-from-vm, do not use the mac option")
+        result = ctx.obj['nc'].get("vports/%s/vminterfaces" % vport_id)[0]
+        if result['MAC']:
+            params['MAC'] = result['MAC']
+    if mac:
+        params['MAC'] = mac
+    result = ctx.obj['nc'].post("vports/%s/virtualips" % vport_id,
+                                params)[0]
+    print_object(result, only=ctx.obj['show_only'])
+
+
+@vsdcli.command(name='virtualip-update')
+@click.argument('virtualip-id', metavar='<ID>', required=True)
+@click.option('--key-value', metavar='<key:value>', multiple=True)
+@click.pass_context
+def virtualip_update(ctx, virtualip_id, key_value):
+    """Update key/value for a given virtualip"""
+    params = {}
+    for kv in key_value:
+        key, value = kv.split(':', 1)
+        params[key] = value
+    ctx.obj['nc'].put("virtualips/%s" % virtualip_id, params)
+    result = ctx.obj['nc'].get("virtualips/%s" % virtualip_id)[0]
+    print_object(result, only=ctx.obj['show_only'])
