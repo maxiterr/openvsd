@@ -356,15 +356,19 @@ def license_create():
 
 @app.route(base_url + "<obj_name>", methods=['POST'])
 def object_create(obj_name):
+    if obj_name == 'vms':
+        if 'vms' not in database:
+            database.update({'vms': []})
     data_update = json.loads(request.data)
+    data_update.update({
+        'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
+        'description': 'None'
+    })
     data_src = get_object_id(obj_name, 'name', data_update['name'])
     if data_src != {}:
         return make_response(json.dumps(
             get_object_id('messages', 'name', 'already exists')['message']), '409')
-    new = {'name': data_update['name'],
-           'ID': '255d9673-7281-43c4-be57-fdec677f6e07',
-           'description': 'None'}
-    database[obj_name].append(new)
+    database[obj_name].append(data_update)
     return json.dumps([get_object_id(obj_name, 'ID', '255d9673-7281-43c4-be57-fdec677f6e07')])
 
 
