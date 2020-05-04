@@ -390,6 +390,8 @@ def object_create_with_parent(parent_name, parent_id, obj_name):
     if obj_name in with_random_uuid:
         import uuid
         uuid = str(uuid.uuid4())
+    if obj_name == 'vminterfaces':
+        data_update.update({'MAC':None})
     data_update.update({
         'ID': uuid,
         'description': 'None'
