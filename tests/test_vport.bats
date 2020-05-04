@@ -232,3 +232,108 @@ source common.bash
     run vsd trunk-show 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
 }
+
+
+@test "Virtual IP: reset mock" {
+    command vsd free-api reset
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/domains --verb POST \
+                         --key-value name:Domain
+    command vsd free-api enterprises/92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e/subnets --verb POST --key-value name:Subnet
+    command vsd free-api subnets/255d9673-7281-43c4-be57-fdec677f6e07/vports --verb POST \
+                         --key-value parentType:subnet \
+                         --key-value domainID:255d9673-7281-43c4-be57-fdec677f6e07 \
+                         --key-value name:Vport-1 \
+                         --key-value active:True \
+                         --key-value type:VM \
+                         --key-value trunkRole:SUB_PORT
+}
+
+
+@test "Virtual IP: create with missing element" {
+    run vsd virtualip-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 
+    assert_fail
+    assert_output_contains "Error: Missing option \"--virtualip\"."
+
+    run vsd virtualip-create --virtualip 123.123.123.123
+    assert_fail
+    assert_output_contains "Error: Missing option \"--vport-id\"."
+}
+
+
+@test "Virtual IP: create without MAC" {
+    run vsd virtualip-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 --virtualip 123.123.123.123
+    assert_success
+    assert_output_contains_in_table virtualIP 123.123.123.123
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Virtual IP: update" {
+    run vsd virtualip-update 255d9673-7281-43c4-be57-fdec677f6e07 --key-value MAC:11:22:33:44:55:66
+    assert_success
+    assert_output_contains_in_table MAC 11:22:33:44:55:66
+
+    # Make this virtual valid because mock doesn't create those values
+    vsd virtualip-update 255d9673-7281-43c4-be57-fdec677f6e07 \
+        --key-value parentType:vport \
+        --key-value parentID:255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Virtual IP: list for a given vport" {
+    run vsd virtualip-list --vport-id 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table 255d9673-7281-43c4-be57-fdec677f6e07 123.123.123.123
+}
+
+
+@test "Virtual IP: show" {
+    run vsd virtualip-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+    assert_output_contains_in_table MAC 11:22:33:44:55:66
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_output_contains_in_table parentID 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Virtual IP: delete" {
+    run vsd virtualip-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_success
+
+    run vsd virtualip-show 255d9673-7281-43c4-be57-fdec677f6e07
+    assert_fail
+    assert_line_equals 0 "Error: Cannot find object with ID"
+}
+
+
+@test "Virtual IP: create sould failled with MAC and same-as-vm option" {
+    run vsd virtualip-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 --virtualip 123.123.123.123 --mac 11:22:33:44:55:66 --mac-from-vm
+    assert_fail
+    assert_output_contains "Error: When you activate mac-from-vm, do not use the mac option"
+}
+
+
+@test "Virtual IP: create with mac" {
+    run vsd virtualip-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 --virtualip 123.123.123.123 --mac 11:22:33:44:55:66
+    assert_success
+    assert_output_contains_in_table MAC 11:22:33:44:55:66
+    assert_output_contains_in_table ID 255d9673-7281-43c4-be57-fdec677f6e07
+
+    command vsd virtualip-delete 255d9673-7281-43c4-be57-fdec677f6e07
+}
+
+
+@test "Virtual IP: create and try to get mac from vm interface" {
+    command vsd free-api vports/255d9673-7281-43c4-be57-fdec677f6e07/vminterfaces --verb POST --key-value name:eth0
+
+    run vsd virtualip-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 --virtualip 123.123.123.123 --mac-from-vm
+    assert_success
+    assert_output_not_contains_in_table MAC
+
+    command vsd virtualip-delete 255d9673-7281-43c4-be57-fdec677f6e07
+    command vsd free-api vminterfaces/255d9673-7281-43c4-be57-fdec677f6e07 --verb PUT --key-value MAC:66:77:88:99:aa:bb
+
+    run vsd virtualip-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 --virtualip 123.123.123.123 --mac-from-vm
+    assert_success
+    assert_output_contains MAC 66:77:88:99:aa:bb
+}
