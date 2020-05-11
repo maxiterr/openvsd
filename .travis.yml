@@ -25,11 +25,18 @@ script:
 
 sudo: false
 
-deploy:
-  edge: true
-  provider: pypi
-  user: "__token__"
-  password:
-    secure: "iEZHd9u8M2mjXJ8Mb5D3BcBVtxKDPqDf6cnwwDzwXreWIlpmeBJrnZkBZdvJMry4EgTtaQGcSEdtf7k2iDGdrCyDo47V2l5bEhPyQ5ScLBS2XrurqdBWt1G8mlZpEF1fpXsLocp3o4y+LRZgPwPPVC+TCNG02xKQeN5SkUAPc6n/wl/IFT3XLgTxG02MBDtzb0gRb1RETNAk6fMiP01qshw1zLUkbqngmcHrFQYhDLkjL7XQuJx6IHbF0QxCweWhUhkUtvVzdhejm2QQhGTteOVRnIHCWOzwyA+d9MHO+nsU3Zd5uOKECa+f4KX3zo41L8nftjgo8vftjA9Eu+wnj4WDNkMkKz3s1ps9gJdK6bjnCLt34jANCkzVRR/56V4/9pYwfXaSt+QQwxMvLIAukBzpswfy+wYqPGvE4Z0lAh68mCEDakEyKDAoGE/8I0t6re7kkMXRo6qQIG+J5EFCm1/wuweANvLgFsUIQD5KuW8/qJrLP8FcvbVwwsCryLWE4JSku5wZKujHtB+BnOdHF8HjnMMW1XGG/wfiYX+A/SRETvfRgWxCX2F/08ACOwvBavxHLR0Mv9lFT/NrW1ePu4lfRLZ+ehpc4BvwIXUAEDiydwFGQOVHitWLg1L3xor929wheq1uOZIAcCEl6ZIQk3gV1EIuTP7KX4HP53Nnq6E="
-  on:
-    tags: true
+jobs:
+  include:
+    - stage: build
+      python: "3.7"
+      script: echo "Starting Pypi build"
+      deploy:
+        provider: pypi
+        user: "__token__"
+        password:
+          secure: "iEZHd9u8M2mjXJ8Mb5D3BcBVtxKDPqDf6cnwwDzwXreWIlpmeBJrnZkBZdvJMry4EgTtaQGcSEdtf7k2iDGdrCyDo47V2l5bEhPyQ5ScLBS2XrurqdBWt1G8mlZpEF1fpXsLocp3o4y+LRZgPwPPVC+TCNG02xKQeN5SkUAPc6n/wl/IFT3XLgTxG02MBDtzb0gRb1RETNAk6fMiP01qshw1zLUkbqngmcHrFQYhDLkjL7XQuJx6IHbF0QxCweWhUhkUtvVzdhejm2QQhGTteOVRnIHCWOzwyA+d9MHO+nsU3Zd5uOKECa+f4KX3zo41L8nftjgo8vftjA9Eu+wnj4WDNkMkKz3s1ps9gJdK6bjnCLt34jANCkzVRR/56V4/9pYwfXaSt+QQwxMvLIAukBzpswfy+wYqPGvE4Z0lAh68mCEDakEyKDAoGE/8I0t6re7kkMXRo6qQIG+J5EFCm1/wuweANvLgFsUIQD5KuW8/qJrLP8FcvbVwwsCryLWE4JSku5wZKujHtB+BnOdHF8HjnMMW1XGG/wfiYX+A/SRETvfRgWxCX2F/08ACOwvBavxHLR0Mv9lFT/NrW1ePu4lfRLZ+ehpc4BvwIXUAEDiydwFGQOVHitWLg1L3xor929wheq1uOZIAcCEl6ZIQk3gV1EIuTP7KX4HP53Nnq6E="
+        on:
+          tags: true
+          branch: master
+          repo: maxiterr/openvsd
+        skip_existing: true
