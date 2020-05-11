@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='vporttag-list')
@@ -25,7 +25,7 @@ def vporttag_list(ctx, filter, **ids):
                        line['description'],
                        line['name'],
                        line['endPointType']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='vport-list')
@@ -67,7 +67,7 @@ def vport_list(ctx, filter, **ids):
                            line['name'],
                            line['active'],
                            line['type']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='vport-show')
@@ -194,7 +194,7 @@ def trunk_list(ctx, filter, **ids):
         table.add_row([line['ID'],
                        line['name'],
                        line['associatedVPortID']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='trunk-show')
@@ -279,7 +279,7 @@ def virtualip_list(ctx, filter, **ids):
                        line['MAC'],
                        line['parentType'],
                        line['parentID']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='virtualip-show')

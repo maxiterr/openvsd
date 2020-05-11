@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='staticroute-list')
@@ -37,7 +37,7 @@ def staticroute_list(ctx, filter, **ids):
             address,
             line['nextHopIp']
         ])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='staticroute-show')

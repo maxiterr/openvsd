@@ -14,19 +14,19 @@
 #    under the License.
 
 
-from vsd_license import *
-from vsd_enterprise import *
-from vsd_domain import *
-from vsd_subnet import *
-from vsd_user import *
-from vsd_gateway import *
-from vsd_vsp import *
-from vsd_vm import *
-from vsd_vport import *
-from vsd_policy import *
-from vsd_dhcp import *
-from vsd_metadata import *
-from vsd_route import *
+from open_vsdcli.vsd_license import *
+from open_vsdcli.vsd_enterprise import *
+from open_vsdcli.vsd_domain import *
+from open_vsdcli.vsd_subnet import *
+from open_vsdcli.vsd_user import *
+from open_vsdcli.vsd_gateway import *
+from open_vsdcli.vsd_vsp import *
+from open_vsdcli.vsd_vm import *
+from open_vsdcli.vsd_vport import *
+from open_vsdcli.vsd_policy import *
+from open_vsdcli.vsd_dhcp import *
+from open_vsdcli.vsd_metadata import *
+from open_vsdcli.vsd_route import *
 
 
 def main():

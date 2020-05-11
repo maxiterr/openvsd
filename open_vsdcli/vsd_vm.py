@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='vm-list')
@@ -41,7 +41,7 @@ def vm_list(ctx, filter, **ids):
                        line['status'],
                        line['hypervisorIP'],
                        line['reasonType']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='vm-show')
@@ -141,7 +141,7 @@ def vminterfaces_list(ctx, filter, **ids):
                        cidr,
                        line['MAC'],
                        line['VPortID']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='vminterface-show')

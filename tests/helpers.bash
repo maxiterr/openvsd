@@ -96,6 +96,21 @@ assert_line_contains() {
 }
 
 
+assert_contains_btw_lines() {
+    STRING_3=$(escape_string "$3")
+    for i in $(seq $1 $2); do
+	if [ $(echo "$(get_in_array $i)" | grep -c -e "$STRING_3") -eq 1 ]; then
+            return 0
+	fi
+    done
+    for i in $(seq $1 $2); do
+	echo -n "Line $i:"
+	echo "$(get_in_array $i)"
+    done
+    return 1
+
+}
+
 assert_line_not_contains() {
     STRING_2=$(escape_string "$2")
     if [ $(echo "$(get_in_array $1)" | grep -c -e "$STRING_2") -eq 0 ]; then

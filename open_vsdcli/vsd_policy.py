@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='egressacltemplate-list')
@@ -29,7 +29,7 @@ def egressacltemplate_list(ctx, filter, **ids):
                        line['active'],
                        line['defaultAllowIP'],
                        line['defaultAllowNonIP']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='egressacltemplate-show')
@@ -116,7 +116,7 @@ def ingressacltemplate_list(ctx, filter, **ids):
                        line['defaultAllowIP'],
                        line['defaultAllowNonIP'],
                        line['allowL2AddressSpoof']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='ingressacltemplate-show')

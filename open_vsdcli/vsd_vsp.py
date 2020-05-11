@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='vsp-list')
@@ -18,7 +18,7 @@ def vsp_list(ctx, filter):
                        line['name'],
                        line['description'],
                        line['productVersion']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='vsp-show')
@@ -50,7 +50,7 @@ def vsd_list(ctx, vsp_id, filter):
                        line['description'],
                        line['status'],
                        line['mode']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='vsd-show')
@@ -62,8 +62,8 @@ def vsd_show(ctx, vsd_id, verbose):
     result = ctx.obj['nc'].get("vsds/%s" % vsd_id)[0]
     print_object(result, only=ctx.obj['show_only'], exclude=['disks'])
     if verbose >= 1:
-        print "Disks :"
-        print result['disks']
+        print("Disks :")
+        print(result['disks'])
 
 
 @vsdcli.command(name='vsd-componant-list')
@@ -87,4 +87,4 @@ def vsd_componant_list(ctx, vsd_id):
                        line['address'],
                        line['productVersion'],
                        line['type']])
-    print table
+    print(table)

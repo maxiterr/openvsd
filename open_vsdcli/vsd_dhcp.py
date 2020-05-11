@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='dhcp-option-list')
@@ -27,7 +27,7 @@ def dhcp_option_list(ctx, filter, **ids):
                        line['type'],
                        line['value'],
                        line['length']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='dhcp-option-show')
@@ -93,7 +93,7 @@ def encode_ip(ip, mask=None):
         return '00'  # As Define in RFC
     data = ''
     if mask:
-        byte_count = (mask-1)/8+1
+        byte_count = int((mask-1)/8+1)
         data = hex(mask)[2:].zfill(2)
     else:
         byte_count = 4
@@ -115,7 +115,7 @@ def decode_route(data):
             byte = 0
             subnet = '0.0.0.0'
         else:
-            byte = (mask-1)/8+1
+            byte = int((mask-1)/8+1)
             subnet = decode_ip(data[:2*byte])
             data = data[2*byte:]
         gateway = decode_ip(data[:8])
@@ -192,7 +192,7 @@ def dhcp_route_list(ctx, filter, **ids):
         table.add_row([line['subnet'] + '/' + line['mask'],
                        line['gateway'],
                        line['option']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='dhcp-route-add')
@@ -225,7 +225,7 @@ def dhcp_route_add(ctx, subnet, mask, gateway, **ids):
 
     params = {}
     params['value'] = encoded_route
-    params['length'] = hex(len(encoded_route)/2)[2:].zfill(2)
+    params['length'] = hex(int(len(encoded_route)/2))[2:].zfill(2)
     type_updated = []
     for option in result:
         if option['type'] in ['79', 'f9']:
@@ -283,7 +283,7 @@ def dhcp_route_delete(ctx, subnet, mask, gateway, **ids):
         encoded_route = encode_route(new_route_list)
         params = {}
         params['value'] = encoded_route
-        params['length'] = hex(len(encoded_route)/2)[2:].zfill(2)
+        params['length'] = hex(int(len(encoded_route)/2))[2:].zfill(2)
         for option in result:
             if option['type'] == '79' or option['type'] == 'f9':
                 ctx.obj['nc'].put("dhcpoptions/%s" % option['ID'], params)
@@ -314,4 +314,4 @@ def dhcp_gateway_show(ctx, filter, **ids):
             gateway = decode_ip(option['value'])
     table = PrettyTable(["Gateway"])
     table.add_row([gateway])
-    print table
+    print(table)

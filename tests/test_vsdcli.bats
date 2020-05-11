@@ -87,19 +87,19 @@ source common.bash
     assert_line_contains 3 "# URL: "
     assert_line_contains 4 "# Headers:"
     assert_line_contains 5 "#    {"
-    assert_line_contains 6 "#        \"X-Nuage-Organization\":"
-    assert_line_contains 7 "#        \"Content-Type\":"
-    assert_line_contains 8 "#        \"Authorization\":"
+    assert_contains_btw_lines 6 8 "#        \"X-Nuage-Organization\":"
+    assert_contains_btw_lines 6 8 "#        \"Content-Type\":"
+    assert_contains_btw_lines 6 8 "#        \"Authorization\":"
     assert_line_contains 9 "#    }"
     assert_line_contains 10 "# Parameters: "
     assert_line_contains 12 "# Response"
     assert_line_contains 13 "# Status code: "
     assert_line_contains 14 "# Headers:"
     assert_line_contains 15 "#    {"
-    assert_line_contains 16 "#        \"Date\":"
-    assert_line_contains 17 "#        \"Content-Length\":"
-    assert_line_contains 18 "#        \"Content-Type\":"
-    assert_line_contains 19 "#        \"Server\":"
+    assert_contains_btw_lines 16 19 "#        \"Date\":"
+    assert_contains_btw_lines 16 19 "#        \"Content-Length\":"
+    assert_contains_btw_lines 16 19 "#        \"Content-Type\":"
+    assert_contains_btw_lines 16 19 "#        \"Server\":"
     assert_line_contains 20 "#    }"
     assert_line_contains 21 "# Body: "
 }
@@ -192,9 +192,9 @@ source common.bash
     assert_success
     assert_line_equals 0 '['
     assert_line_equals 1 '    {'
-    assert_line_equals 2 '        "ID": "255d9673-7281-43c4-be57-fdec677f6e07", '
-    assert_line_equals 3 '        "description": "None", '
-    assert_line_equals 4 '        "name": "enterpriseTest"'
+    assert_contains_btw_lines 2 4 '"ID": "255d9673-7281-43c4-be57-fdec677f6e07"'
+    assert_contains_btw_lines 2 4 '"description": "None"'
+    assert_contains_btw_lines 2 4 '"name": "enterpriseTest"'
     assert_line_equals 5 '    }'
     assert_line_equals 6 ']'
 }
