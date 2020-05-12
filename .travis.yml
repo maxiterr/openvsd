@@ -31,10 +31,11 @@ jobs:
       python: "3.7"
       script: echo "Starting Pypi build"
       deploy:
+        edge: true
         provider: pypi
         user: "__token__"
         password:
-          secure: "iEZHd9u8M2mjXJ8Mb5D3BcBVtxKDPqDf6cnwwDzwXreWIlpmeBJrnZkBZdvJMry4EgTtaQGcSEdtf7k2iDGdrCyDo47V2l5bEhPyQ5ScLBS2XrurqdBWt1G8mlZpEF1fpXsLocp3o4y+LRZgPwPPVC+TCNG02xKQeN5SkUAPc6n/wl/IFT3XLgTxG02MBDtzb0gRb1RETNAk6fMiP01qshw1zLUkbqngmcHrFQYhDLkjL7XQuJx6IHbF0QxCweWhUhkUtvVzdhejm2QQhGTteOVRnIHCWOzwyA+d9MHO+nsU3Zd5uOKECa+f4KX3zo41L8nftjgo8vftjA9Eu+wnj4WDNkMkKz3s1ps9gJdK6bjnCLt34jANCkzVRR/56V4/9pYwfXaSt+QQwxMvLIAukBzpswfy+wYqPGvE4Z0lAh68mCEDakEyKDAoGE/8I0t6re7kkMXRo6qQIG+J5EFCm1/wuweANvLgFsUIQD5KuW8/qJrLP8FcvbVwwsCryLWE4JSku5wZKujHtB+BnOdHF8HjnMMW1XGG/wfiYX+A/SRETvfRgWxCX2F/08ACOwvBavxHLR0Mv9lFT/NrW1ePu4lfRLZ+ehpc4BvwIXUAEDiydwFGQOVHitWLg1L3xor929wheq1uOZIAcCEl6ZIQk3gV1EIuTP7KX4HP53Nnq6E="
+          secure: "Q2sHZKh043MQqE/iZJMi8J/4DIoCX4xDo+BGqzm/ioVWUc1Y70a7Fq3syZpQ3NvBxjF5osrZujq8w4ZSylPHTSNQSWUBi/u4LrfPntHSp6zZJ+m+Qc64vG5+IzGBY/lLUAlYLl6JRH1t92Qa1Ua7+2wy4d12J9x0ZBVKlzUiyBRbWIc9ZoSuqZiKKRIMYDmiwdNaRooYp3SIubIqYfqTZDlu6eTZ92WS2tKaT+AykADHWMZ2N9SPlcpJVSG41m3oD1527YhNEMB5uyOFaPqvZLSYwlQ7v7elIft9LJD/WLJxZkY4J5HyEF6FqcJ3sw8ekWuCNZoQgj2o6MXvcCoPc754JrLcQDxirM8yupXOSY9PswPz1R+GdDKnLlu3F5UksUmPqGGeWFpQdE58KBuKVx1AR4D4ciYYHbcIIV9XcnDbakJ/LqJz284Ec0u8ymH7ukfx0bgA7WQp5qZ1Ojy7H9+Qat75jN3yex0KIR7Tntp3J4gXaE8fdop+8/eBYRef4J1gk1Ua+CAOyeUL7mF9/AvoqCgXbDRDVaHGd9Jb5m0/KIAOPEwhch/Ol2JWlKPDrzdS8rVgyTIn2qK04lQxM/XpM3OpswSGIo3NtXWzWYridZuC3r/zs9+FtIWKLgPL8evCwvqZJSpT2X3iuHnW544bB3VG+Prn0fq8656Bmow="
         on:
           tags: true
           branch: master
