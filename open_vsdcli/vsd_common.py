@@ -116,6 +116,31 @@ def print_version(ctx, param, value):
     ctx.exit()
 
 
+def print_completion(ctx, param, value):
+    from os import environ
+    from click._bashcomplete import get_completion_script
+    if not value or ctx.resilient_parsing:
+        return
+
+    try:
+        env_shell = environ['SHELL'].lower()
+    except:
+        click.echo('Unable to detect shell. Missing "SHELL" env variable.')
+        ctx.exit()
+
+    shell = [el for el in ['bash', 'zsh', 'fish'] if el in env_shell]
+    if not shell:
+        click.echo('Shell "%s" not supported for completion.' % env_shell)
+        click.echo('Supported shell: "bash", "zsh", "fish".')
+        ctx.exit()
+
+    shell = shell[0]
+    click.echo('# vsd %s completion start' % shell)
+    print(get_completion_script("vsd", "_VSD_COMPLETE", shell).strip())
+    click.echo('# vsd %s completion end' % shell)
+    ctx.exit()
+
+
 @click.group()
 @click.option('--creds', is_flag=True, callback=print_creds, is_eager=True,
               expose_value=False, help='Display creds example')
@@ -160,6 +185,9 @@ def print_version(ctx, param, value):
               help='Active debug for request and response')
 @click.option('--force-auth', is_flag=True,
               help='Do not use existing APIkey. Replay authentication')
+@click.option('--completion', is_flag=True, callback=print_completion,
+              is_eager=True, expose_value=False,
+              help='Display script to enable completion')
 @click.pass_context
 def vsdcli(ctx, vsd_username, vsd_password, vsd_enterprise,
            vsd_api_version, vsd_api_url, show_only, vsd_disable_proxy,
