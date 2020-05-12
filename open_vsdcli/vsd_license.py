@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='license-list')
@@ -26,7 +26,7 @@ def license_list(ctx):
                        datetime.fromtimestamp(
                            line['expirationDate'] /
                            1000).strftime('%Y-%m-%d %H:%M:%S')])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='license-show')
@@ -39,7 +39,7 @@ def license_show(ctx, license_id, verbose):
     print_object(result, exclude=['license'], only=ctx.obj['show_only'])
     if verbose >= 1:
         if result['license']:
-            print "License: " + result['license']
+            print("License: " + result['license'])
         else:
             print("License: None")
 

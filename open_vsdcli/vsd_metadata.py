@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='metadata-list')
@@ -22,7 +22,7 @@ def metadata_list(ctx, filter, entity, id, is_global):
         table.add_row([line['ID'],
                        line['name'],
                        line['description']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='metadata-show')
@@ -42,7 +42,7 @@ def metadata_show(ctx, metadata_id, data, is_global, list_tag):
         request = "metadatas/%s" % metadata_id
     result = ctx.obj['nc'].get(request)[0]
     if data:
-        print result['blob']
+        print(result['blob'])
         return
     if not list_tag:
         print_object(result, only=ctx.obj['show_only'], exclude=['blob'])
@@ -55,7 +55,7 @@ def metadata_show(ctx, metadata_id, data, is_global, list_tag):
         table.add_row([line['ID'],
                        line['name'],
                        line['description']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='metadata-create')
@@ -192,7 +192,7 @@ def metadatatag_list(ctx, enterprise_id, metadata_id, filter):
         table.add_row([line['ID'],
                        line['name'],
                        line['description']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='metadatatag-show')

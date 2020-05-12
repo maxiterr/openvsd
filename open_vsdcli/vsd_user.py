@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='user-list')
@@ -27,7 +27,7 @@ def user_list_list(ctx, filter, **ids):
                        line['firstName'],
                        line['lastName'],
                        line['email']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='user-show')
@@ -56,7 +56,7 @@ def user_create(ctx, username, firstname, lastname, email, password,
               'firstName': firstname,
               'lastName':  lastname,
               'email':     email,
-              'password':  hashlib.sha1(password).hexdigest()}
+              'password':  hashlib.sha1(password.encode('utf-8')).hexdigest()}
     result = ctx.obj['nc'].post("enterprises/%s/users" %
                                 enterprise_id, params)[0]
     print_object(result, only=ctx.obj['show_only'])
@@ -108,7 +108,7 @@ def group_list(ctx, filter, **ids):
                        line['description'],
                        line['role'],
                        line['private']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='group-show')
@@ -186,7 +186,7 @@ def group_del_user(ctx, group_id, user_id):
     user_list = ctx.obj['nc'].get("groups/%s/users" % group_id)
     user_ids = [elt.get('ID') for elt in user_list if elt.get('ID') != user_id]
     if len(user_ids) == len(user_list):
-        print "User not present in the group"
+        print("User not present in the group")
     else:
         ctx.obj['nc'].put("groups/%s/users" % group_id, user_ids)
 
@@ -225,7 +225,7 @@ def permission_list(ctx, filter, **ids):
                        line['permittedEntityID'],
                        line['permittedEntityType'],
                        line['permittedEntityName']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='permission-show')

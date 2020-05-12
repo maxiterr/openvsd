@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='domaintemplate-list')
@@ -14,7 +14,7 @@ def domaintemplate_list(ctx, enterprise_id, filter):
     for line in result:
         table.add_row([line['ID'],
                        line['name']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='domaintemplate-show')
@@ -91,7 +91,7 @@ def domain_list(ctx, filter, **ids):
             line['name'],
             line['description'],
             line['routeTarget'] + " / " + line['routeDistinguisher']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='domain-show')
@@ -169,7 +169,7 @@ def zone_list(ctx, domain_id, filter):
     for line in result:
         table.add_row([line['ID'],
                        line['name']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='zone-show')

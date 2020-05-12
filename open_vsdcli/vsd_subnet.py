@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='subnet-list')
@@ -42,7 +42,7 @@ def subnet_list(ctx, filter, **ids):
                        line['gateway'],
                        rt_rd,
                        line['externalID']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='subnet-show')
@@ -135,7 +135,7 @@ def shared_network_list(ctx, filter):
                 line['domainRouteTarget'],
                 line['domainRouteDistinguisher']])
         ])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='shared-network-show')
@@ -172,7 +172,7 @@ def l2domain_list(ctx, filter, **ids):
             line['description'],
             line['routeTarget'] + " / " + line['routeDistinguisher']
         ])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='l2domain-show')
@@ -246,7 +246,7 @@ def floatingip_list(ctx, id, filter):
                        line['address'],
                        line['assigned'],
                        line['externalID']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='floatingip-show')

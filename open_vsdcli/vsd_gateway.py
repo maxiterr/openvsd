@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='gateway-create')
@@ -70,7 +70,7 @@ def gateway_list(ctx, enterprise_id, redundancygroup_id, filter):
                        line['pending'],
                        line['redundancyGroupID'],
                        line['personality']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='gateway-show')
@@ -122,7 +122,7 @@ def port_list(ctx, filter, **ids):
                        line['name'],
                        line['physicalName'],
                        line['portType']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='port-show')
@@ -164,7 +164,7 @@ def vlan_list(ctx, filter, port_id):
                        line['description'],
                        line['value'],
                        line['userMnemonic']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='vlan-show')
@@ -238,7 +238,7 @@ def bridgeinterface_list(ctx, filter, **ids):
         table.add_row([line['ID'],
                        line['name'],
                        line['VPortID']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='gatewayredundancygroup-list')
@@ -269,7 +269,7 @@ def gatewayredundancygroup_list(ctx, filter, enterprise_id):
                        line['personality'],
                        line['gatewayPeer1Name'],
                        line['gatewayPeer2Name']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='gatewayredundancygroup-create')

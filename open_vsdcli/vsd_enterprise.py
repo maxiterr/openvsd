@@ -1,4 +1,4 @@
-from vsd_common import *
+from open_vsdcli.vsd_common import *
 
 
 @vsdcli.command(name='enterprise-list')
@@ -13,7 +13,7 @@ def enterprise_list(ctx, filter):
     for line in result:
         table.add_row([line['ID'],
                        line['name']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='enterprise-show')
@@ -89,7 +89,7 @@ def enterprisepermission_list(ctx, filter, **ids):
                        line['permittedEntityID'],
                        line['permittedEntityType'],
                        line['permittedEntityName']])
-    print table
+    print(table)
 
 
 @vsdcli.command(name='enterprisepermission-show')

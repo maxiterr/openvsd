@@ -1,6 +1,6 @@
 from prettytable import PrettyTable
 import click
-from vsd_client import VSDConnection
+from open_vsdcli.vsd_client import VSDConnection
 
 
 def print_object(obj, only=None, exclude=[]):
@@ -37,12 +37,12 @@ def print_object(obj, only=None, exclude=[]):
                     else:
                         value = obj[key]
                     table.add_row([key, value])
-        print table
+        print(table)
     if only:
         if only in obj:
-            print obj[only]
+            print(obj[only])
         else:
-            print "No such key : %s" % only
+            print("No such key : %s" % only)
     else:
         _print_table(obj, exclude)
 
@@ -284,4 +284,4 @@ def free_api(ctx, ressource, verb, header, key_value, body):
         result = ctx.obj['nc'].post(ressource, params, headers=h)
     elif verb == 'DELETE':
         result = ctx.obj['nc'].delete(ressource)
-    print json.dumps(result, indent=4)
+    print(json.dumps(result, indent=4))
