@@ -32,19 +32,19 @@ source common.bash
 @test "Vm: create with missing element" {
     run vsd vm-create --uuid 255d9673-7281-43c4-be57-fdec677f6e07 --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 --mac 11:22:33:44:55:66
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"<name>\"."
+    assert_line_equals -1 "Error: Missing argument '<name>'."
 
     run vsd vm-create Vm-1 --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 --mac 11:22:33:44:55:66
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--uuid\"."
+    assert_line_equals -1 "Error: Missing option '--uuid'."
 
     run vsd vm-create Vm-1 --uuid 255d9673-7281-43c4-be57-fdec677f6e07 --mac 11:22:33:44:55:66
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--vport-id\"."
+    assert_line_equals -1 "Error: Missing option '--vport-id'."
 
     run vsd vm-create Vm-1 --uuid 255d9673-7281-43c4-be57-fdec677f6e07 --vport-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--mac\"."
+    assert_line_equals -1 "Error: Missing option '--mac'."
 }
 
 

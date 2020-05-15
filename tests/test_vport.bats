@@ -34,15 +34,15 @@ source common.bash
 @test "Vport: create with missing element" {
     run vsd vport-create --type VM --active --address-spoofing ENABLED --subnet-id 255d9673-7281-43c4-be57-fdec677f6e07 
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"<name>\"."
+    assert_line_equals -1 "Error: Missing argument '<name>'."
 
     run vsd vport-create Vport-1 --active --address-spoofing ENABLED --subnet-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_output_contains "Error: Missing option \"--type\"."
+    assert_output_contains "Error: Missing option '--type'."
 
     run vsd vport-create Vport-1 --type VM --active --subnet-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_output_contains "Error: Missing option \"--address-spoofing\"."
+    assert_output_contains "Error: Missing option '--address-spoofing'."
 
     run vsd vport-create Vport-1 --type VM --active --address-spoofing ENABLED
     assert_fail
@@ -137,11 +137,11 @@ source common.bash
 @test "Trunk: create with missing element" {
     run vsd trunk-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"<name>\"."
+    assert_line_equals -1 "Error: Missing argument '<name>'."
 
     run vsd trunk-create Trunk-1
     assert_fail
-    assert_output_contains "Error: Missing option \"--vport-id\"."
+    assert_output_contains "Error: Missing option '--vport-id'."
 }
 
 
@@ -252,11 +252,11 @@ source common.bash
 @test "Virtual IP: create with missing element" {
     run vsd virtualip-create --vport-id 255d9673-7281-43c4-be57-fdec677f6e07 
     assert_fail
-    assert_output_contains "Error: Missing option \"--virtualip\"."
+    assert_output_contains "Error: Missing option '--virtualip'."
 
     run vsd virtualip-create --virtualip 123.123.123.123
     assert_fail
-    assert_output_contains "Error: Missing option \"--vport-id\"."
+    assert_output_contains "Error: Missing option '--vport-id'."
 }
 
 

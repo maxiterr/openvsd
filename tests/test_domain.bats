@@ -91,15 +91,15 @@ source common.bash
 @test "Domain: create without missing element" {
     run vsd domain-create Domain-1 --template-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--enterprise-id\"."
+    assert_line_equals -1 "Error: Missing option '--enterprise-id'."
 
     run vsd domain-create Domain-1 --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--template-id\"."
+    assert_line_equals -1 "Error: Missing option '--template-id'."
 
     run vsd domain-create --enterprise-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --template-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"<name>\"."
+    assert_line_equals -1 "Error: Missing argument '<name>'."
 }
 
 
@@ -192,11 +192,11 @@ source common.bash
 @test "Zone: create without missing element" {
     run vsd zone-create Zone-1
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--domain-id\"."
+    assert_line_equals -1 "Error: Missing option '--domain-id'."
 
     run vsd zone-create --domain-id 255d9673-7281-43c4-be57-fdec677f6e07
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"<name>\"."
+    assert_line_equals -1 "Error: Missing argument '<name>'."
 }
 
 

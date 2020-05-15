@@ -37,15 +37,15 @@ source common.bash
 
     run vsd staticroute-create --domain-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --mask 255.255.255.0 --gateway 10.0.0.1
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--address\"."
+    assert_line_equals -1 "Error: Missing option '--address'."
 
     run vsd staticroute-create --domain-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --address 192.168.0.0 --gateway 10.0.0.1
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--mask\"."
+    assert_line_equals -1 "Error: Missing option '--mask'."
 
     run vsd staticroute-create --domain-id 92a76e6f-2ac4-43f2-8c1f-a052c5f4d90e --address 192.168.0.0 --mask 255.255.255.0
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--gateway\"."
+    assert_line_equals -1 "Error: Missing option '--gateway'."
 }
 
 

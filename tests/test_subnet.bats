@@ -35,19 +35,19 @@ source common.bash
 @test "Subnet: create without missing element" {
     run vsd subnet-create --zone-id 255d9673-7281-43c4-be57-fdec677f6e07 --address 192.168.0.0 --netmask 255.255.255.0
     assert_fail
-    assert_line_equals -1 "Error: Missing argument \"<name>\"."
+    assert_line_equals -1 "Error: Missing argument '<name>'."
 
     run vsd subnet-create Subnet-1 --zone-id 255d9673-7281-43c4-be57-fdec677f6e07 --address 192.168.0.0
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--netmask\"."
+    assert_line_equals -1 "Error: Missing option '--netmask'."
 
     run vsd subnet-create Subnet-1 --zone-id 255d9673-7281-43c4-be57-fdec677f6e07 --netmask 255.255.255.0
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--address\"."
+    assert_line_equals -1 "Error: Missing option '--address'."
 
     run vsd subnet-create Subnet-1 --address 192.168.0.0 --netmask 255.255.255.0
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--zone-id\"."
+    assert_line_equals -1 "Error: Missing option '--zone-id'."
 }
 
 

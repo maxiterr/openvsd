@@ -40,17 +40,17 @@ source common.bash
     # Miss value
     run vsd dhcp-option-add --subnet-id 255d9673-7281-43c4-be57-fdec677f6e07 --type 79 --length 08
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--value\"."
+    assert_line_equals -1 "Error: Missing option '--value'."
 
     # Miss type
     run vsd dhcp-option-add --subnet-id 255d9673-7281-43c4-be57-fdec677f6e07 --value 18c0a80ac0a80001 --length 08
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--type\"."
+    assert_line_equals -1 "Error: Missing option '--type'."
 
     # Miss length
     run vsd dhcp-option-add --subnet-id 255d9673-7281-43c4-be57-fdec677f6e07 --value 18c0a80ac0a80001 --type 79
     assert_fail
-    assert_line_equals -1 "Error: Missing option \"--length\"."
+    assert_line_equals -1 "Error: Missing option '--length'."
 }
 
 

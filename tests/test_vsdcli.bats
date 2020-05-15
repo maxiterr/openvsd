@@ -160,7 +160,7 @@ source common.bash
 @test "free-api: use with non-existing verb" {
     run vsd free-api enterprises --verb FALSE
     assert_fail
-    assert_line_equals -1 'Error: Invalid value for "--verb": invalid choice: FALSE. (choose from PUT, GET, POST, DELETE)'
+    assert_line_equals -1 "Error: Invalid value for '--verb': invalid choice: FALSE. (choose from PUT, GET, POST, DELETE)"
 }
 
 
