@@ -7,9 +7,9 @@ python:
   - '3.7'
 
 before_install:
-  - wget https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz
-  - tar xzf v0.4.0.tar.gz
-  - export PATH=$PWD/bats-0.4.0/bin:$PATH
+#  - wget https://github.com/sstephenson/bats/archive/v0.4.0.tar.gz
+#  - tar xzf v0.4.0.tar.gz
+#  - export PATH=$PWD/bats-0.4.0/bin:$PATH
   - bats -v
 
 install:
@@ -20,7 +20,7 @@ install:
   - pip install -e .
 
 script:
-  - export PATH=$PWD/bats-0.4.0/bin:$PATH
+#  - export PATH=$PWD/bats-0.4.0/bin:$PATH
   - tests/run_tests.sh
 
 sudo: false
