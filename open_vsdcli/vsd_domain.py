@@ -1,4 +1,7 @@
 from open_vsdcli.vsd_common import *
+import os
+import sys
+
 
 
 @vsdcli.command(name='domaintemplate-list')
@@ -124,11 +127,24 @@ def domain_create(ctx, name, enterprise_id, template_id, rt, rd):
 
 
 @vsdcli.command(name='domain-delete')
-@click.argument('domain-id', metavar='<domain ID>', required=True)
+@click.argument('domain-id', metavar='<domain ID>', required=False)
 @click.pass_context
 def domain_delete(ctx, domain_id):
     """Delete a given domain"""
-    ctx.obj['nc'].delete("domains/%s" % domain_id)
+    #ctx.obj['nc'].delete("domains/%s" % domain_id)
+    if os.isatty(sys.stdin.fileno()) and not domain_id:
+        print("Error: Please enter an id to delete")
+        ctx.exit()
+    if not os.isatty(sys.stdin.fileno()) and domain_id:
+        print("Error: Please choose between stdin or command")
+        ctx.exit()
+    if domain_id:
+        print("Delete this: %s" % domain_id)
+        ctx.exit()
+    else:
+        for line in sys.stdin.readlines():
+            for obj in line.split():
+                print(obj)
 
 
 @vsdcli.command(name='domain-update')
